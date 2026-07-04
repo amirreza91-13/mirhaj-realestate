@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ورود - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/protect.js"></script>
+</head>
+<body style="background:linear-gradient(135deg,var(--primary-dark),var(--primary-light));min-height:100vh;display:flex;flex-direction:column">
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <img src="/assets/logo-small.svg" alt="املاک میرحاج" style="height:40px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="brand-icon" style="display:none">🏠</div>
+      <span>املاک میرحاج</span>
+    </a>
+    <div class="navbar-actions">
+      <a href="/pages/register.html" class="btn btn-outline btn-sm">ثبت‌نام</a>
+    </div>
+  </div>
+</nav>
+
+<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem">
+  <div style="width:100%;max-width:420px">
+
+    <div style="text-align:center;margin-bottom:1.5rem;color:white">
+      <div style="font-size:3rem;margin-bottom:0.5rem">🔑</div>
+      <h1 style="font-size:1.6rem">ورود به حساب کاربری</h1>
+      <p style="opacity:0.8;margin-top:0.4rem">خوش برگشتید!</p>
+    </div>
+
+    <div class="card">
+      <div class="card-body" style="padding:2rem">
+        <div id="login-alert"></div>
+
+        <div class="form-group">
+          <label class="form-label">نام کاربری <span class="required">*</span></label>
+          <input type="text" class="form-control" id="username" placeholder="نام کاربری خود را وارد کنید" autofocus>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">رمز عبور <span class="required">*</span></label>
+          <div style="position:relative">
+            <input type="password" class="form-control" id="password" placeholder="رمز عبور خود را وارد کنید">
+            <button type="button" onclick="togglePassword('password','eye-btn')"
+              id="eye-btn"
+              style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.1rem;cursor:pointer">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1.25rem">
+          <input type="checkbox" id="remember-me" style="width:16px;height:16px;cursor:pointer">
+          <label for="remember-me" style="font-size:0.88rem;cursor:pointer">مرا به خاطر بسپار</label>
+        </div>
+
+        <button class="btn btn-primary btn-block btn-lg" id="login-btn" onclick="doLogin()">
+          ورود
+        </button>
+
+        <div style="text-align:center;margin-top:1.25rem;font-size:0.9rem;color:var(--text-muted)">
+          حساب کاربری ندارید؟
+          <a href="/pages/register.html" style="color:var(--primary);font-weight:600">ثبت‌نام کنید</a>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:1.5rem;color:rgba(255,255,255,0.6);font-size:0.8rem">
+      📞 09132089979 | محمدآباد جرقویه
+    </div>
+  </div>
+</div>
+
+<script src="/js/main.js"></script>
+<script>
+  // Redirect if already logged in
+  if (isLoggedIn()) location.href = '/pages/index.html';
+
+  function togglePassword(inputId, btnId) {
+    const input = document.getElementById(inputId);
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  async function doLogin() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const alertEl = document.getElementById('login-alert');
+    const btn = document.getElementById('login-btn');
+
+    alertEl.innerHTML = '';
+
+    if (!username || !password) {
+      alertEl.innerHTML = `<div class="alert alert-warning">⚠️ لطفاً نام کاربری و رمز عبور را وارد کنید</div>`;
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner spinner-sm"></div> در حال ورود...`;
+
+    const { ok, data } = await apiFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
+
+    btn.disabled = false;
+    btn.innerHTML = 'ورود';
+
+    if (ok && data.success) {
+      setAuth(data.token, data.user);
+      showToast('ورود موفق! خوش آمدید 👋', 'success');
+
+      const redirect = new URLSearchParams(window.location.search).get('redirect');
+      setTimeout(() => {
+        if (redirect) location.href = redirect;
+        else if (data.user.role === 'manager') location.href = '/pages/dashboard-manager.html';
+        else if (data.user.role === 'agent') location.href = '/pages/dashboard-agent.html';
+        else location.href = '/pages/dashboard-user.html';
+      }, 800);
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-danger">❌ ${data.message || 'خطا در ورود'}</div>`;
+    }
+  }
+
+  // Enter key support
+  document.addEventListener('keypress', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+</script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

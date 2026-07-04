@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>جزئیات آگهی - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    .detail-grid { display:grid; grid-template-columns:1fr 360px; gap:2rem; align-items:start; }
+    .sticky-col { position:sticky; top:calc(var(--nav-height) + 1rem); }
+    .gallery-wrap { border-radius:var(--radius-lg); overflow:hidden; background:#0D1B2A; position:relative; }
+    .gallery-main-img { width:100%; height:420px; object-fit:cover; cursor:zoom-in; display:block; transition:transform 0.4s; }
+    .gallery-main-img:hover { transform:scale(1.02); }
+    .gallery-no-img { height:420px; display:flex; align-items:center; justify-content:center; font-size:6rem; color:rgba(255,255,255,0.2); }
+    .gallery-nav-btn { position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.9); border:none; border-radius:50%; width:42px; height:42px; font-size:1.2rem; cursor:pointer; box-shadow:var(--shadow); transition:var(--transition); display:flex; align-items:center; justify-content:center; }
+    .gallery-nav-btn:hover { background:white; transform:translateY(-50%) scale(1.1); }
+    .gallery-nav-btn.prev { right:1rem; }
+    .gallery-nav-btn.next { left:1rem; }
+    .gallery-counter { position:absolute; bottom:0.75rem; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); color:white; border-radius:20px; padding:0.25rem 0.85rem; font-size:0.8rem; }
+    .gallery-thumbs { display:flex; gap:0.5rem; margin-top:0.6rem; flex-wrap:wrap; }
+    .thumb { width:80px; height:60px; border-radius:var(--radius-sm); overflow:hidden; cursor:pointer; opacity:0.6; border:2.5px solid transparent; transition:var(--transition); flex-shrink:0; }
+    .thumb.active, .thumb:hover { opacity:1; border-color:var(--primary); }
+    .thumb img { width:100%; height:100%; object-fit:cover; }
+    .price-banner { background:linear-gradient(135deg,#0D1B2A,#1B4F72); color:white; border-radius:var(--radius); padding:1.25rem; margin-bottom:1rem; }
+    .price-banner .total { font-size:1.8rem; font-weight:900; margin:0.3rem 0; }
+    .price-banner .ppm { font-size:0.82rem; opacity:0.75; }
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+    .info-item { background:var(--bg); border-radius:var(--radius-sm); padding:0.75rem; border-right:3px solid var(--primary); }
+    .info-item .lbl { font-size:0.72rem; color:var(--text-muted); margin-bottom:0.2rem; }
+    .info-item .val { font-weight:700; font-size:0.88rem; }
+    .feature-row { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .feature-chip { padding:0.3rem 0.8rem; border-radius:20px; font-size:0.78rem; font-weight:600; border:1px solid; }
+    .feature-chip.yes { background:#EAFAF1; color:#27AE60; border-color:#A9DFBF; }
+    .feature-chip.no  { background:#FDEDEC; color:#E74C3C; border-color:#F5B7B1; }
+    .contact-card { background:white; border:1px solid var(--border); border-radius:var(--radius); padding:1rem; margin-bottom:1rem; }
+    .btn-call { background:#27AE60; color:white; border:none; border-radius:var(--radius-sm); padding:0.65rem 1rem; font-family:var(--font); font-size:0.88rem; font-weight:700; cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:var(--transition); }
+    .btn-call:hover { background:#1E8449; }
+    .btn-wa { background:#25D366; color:white; border:none; border-radius:var(--radius-sm); padding:0.65rem 1rem; font-family:var(--font); font-size:0.88rem; font-weight:700; cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:var(--transition); text-decoration:none; }
+    .btn-wa:hover { background:#20BA5A; }
+    .action-row { display:flex; gap:0.5rem; margin-bottom:0.5rem; }
+    .action-row .btn { flex:1; justify-content:center; }
+    #property-map { height:250px; border-radius:var(--radius); z-index:1; }
+    .zoom-ov { position:fixed; inset:0; background:rgba(0,0,0,0.93); z-index:9000; display:flex; align-items:center; justify-content:center; cursor:zoom-out; animation:fadeIn 0.2s; }
+    .zoom-ov img { max-width:93vw; max-height:93vh; object-fit:contain; border-radius:var(--radius); }
+    .zoom-close { position:absolute; top:1.5rem; left:1.5rem; background:rgba(255,255,255,0.15); border:none; color:white; font-size:1.5rem; width:46px; height:46px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
+    .zoom-close:hover { background:rgba(255,255,255,0.25); }
+    @media (max-width:900px) { .detail-grid { grid-template-columns:1fr; } .sticky-col { position:static; } }
+    @media (max-width:600px) { .gallery-main-img { height:260px; } .info-grid { grid-template-columns:1fr 1fr; } }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <img src="/assets/logo-small.svg" alt="املاک میرحاج" style="height:40px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="brand-icon" style="display:none">🏠</div>
+      <span>املاک میرحاج</span>
+    </a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+      <li><a href="/pages/ai-assistant.html">🤖 دستیار AI</a></li>
+      <li><a href="/pages/compare.html">🔄 مقایسه</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth" style="display:flex;gap:0.4rem">
+        <a href="/pages/login.html" class="btn btn-ghost btn-sm">ورود</a>
+        <a href="/pages/register.html" class="btn btn-primary btn-sm">ثبت‌نام</a>
+      </div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="/pages/create-listing.html" class="btn btn-accent btn-sm">➕ ثبت آگهی</a>
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.35rem 0.85rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:115%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:190px;z-index:999;padding:0.5rem 0">
+            <a href="/pages/dashboard-user.html" style="display:flex;align-items:center;gap:0.7rem;padding:0.7rem 1rem;font-size:0.88rem">👤 داشبورد</a>
+            <a href="/pages/bookmarks.html" style="display:flex;align-items:center;gap:0.7rem;padding:0.7rem 1rem;font-size:0.88rem">🔖 علاقه‌مندی‌ها</a>
+            <a href="/pages/messages.html" style="display:flex;align-items:center;gap:0.7rem;padding:0.7rem 1rem;font-size:0.88rem">💬 پیام‌ها</a>
+            <hr style="margin:0.3rem 0;border:none;border-top:1px solid var(--border)">
+            <a href="#" onclick="logout()" style="display:flex;align-items:center;gap:0.7rem;padding:0.7rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Breadcrumb -->
+<div style="background:white;border-bottom:1px solid var(--border);padding:0.65rem 0">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/pages/index.html">خانه</a>
+      <span><a href="/pages/properties.html">آگهی‌ها</a></span>
+      <span id="bc-title">جزئیات آگهی</span>
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div id="loading" class="container" style="padding:5rem 0;text-align:center">
+  <div class="spinner"></div>
+  <p style="margin-top:1rem;color:var(--text-muted)">در حال بارگذاری...</p>
+</div>
+
+<!-- Not Found -->
+<div id="not-found" class="container hidden" style="padding:4rem 0">
+  <div class="empty-state">
+    <div class="empty-icon">🏚️</div>
+    <h3>آگهی یافت نشد</h3>
+    <a href="/pages/properties.html" class="btn btn-primary mt-2">بازگشت به آگهی‌ها</a>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div id="content" class="hidden">
+  <div class="container" style="padding:1.5rem 1.25rem 3rem">
+    <div class="detail-grid">
+
+      <!-- LEFT -->
+      <div>
+        <!-- Gallery -->
+        <div class="gallery-wrap" id="gallery-wrap">
+          <div class="gallery-no-img" id="gallery-no-img">🏠</div>
+        </div>
+        <div class="gallery-thumbs" id="gallery-thumbs"></div>
+
+        <!-- Title Section -->
+        <div class="mt-3">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+            <div style="flex:1">
+              <div id="type-badge" class="badge badge-primary" style="font-size:0.82rem;margin-bottom:0.5rem"></div>
+              <h1 id="prop-title" style="font-size:1.5rem;font-weight:900;line-height:1.4;margin-bottom:0.4rem"></h1>
+              <div id="prop-loc" style="color:var(--text-muted);font-size:0.9rem"></div>
+            </div>
+            <div style="display:flex;gap:0.4rem;flex-shrink:0;margin-top:0.25rem">
+              <button id="bm-btn" onclick="toggleBM()" class="btn btn-ghost btn-sm" title="ذخیره در علاقه‌مندی‌ها">🔖</button>
+              <button onclick="shareIt()" class="btn btn-ghost btn-sm" title="اشتراک‌گذاری">🔗</button>
+              <a id="print-btn" href="#" target="_blank" class="btn btn-ghost btn-sm" title="چاپ / PDF">🖨️</a>
+              <button onclick="addCmp()" class="btn btn-ghost btn-sm" title="افزودن به مقایسه">🔄</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Specs Card -->
+        <div class="card mt-3">
+          <div class="card-header" style="font-size:0.95rem;font-weight:700">📋 مشخصات ملک</div>
+          <div class="card-body">
+            <div class="info-grid" id="info-grid"></div>
+          </div>
+        </div>
+
+        <!-- Features -->
+        <div class="card mt-2">
+          <div class="card-body">
+            <div class="feature-row" id="feature-row"></div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="card mt-2" id="desc-card" style="display:none">
+          <div class="card-header" style="font-size:0.95rem;font-weight:700">📝 توضیحات</div>
+          <div class="card-body">
+            <p id="prop-desc" style="line-height:2;color:var(--text-secondary);font-size:0.9rem;margin:0"></p>
+          </div>
+        </div>
+
+        <!-- Map -->
+        <div class="card mt-2" id="map-card" style="display:none">
+          <div class="card-header" style="font-size:0.95rem;font-weight:700">🗺️ موقعیت روی نقشه</div>
+          <div class="card-body" style="padding:0.75rem">
+            <div id="property-map"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT STICKY -->
+      <div class="sticky-col">
+
+        <!-- Price Banner -->
+        <div class="price-banner">
+          <div style="font-size:0.78rem;opacity:0.75">قیمت کل</div>
+          <div class="total" id="prop-price">---</div>
+          <div class="ppm" id="prop-ppm"></div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="card mb-2">
+          <div class="card-body" style="padding:0.85rem">
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap" id="quick-stats"></div>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="contact-card mb-2">
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.6rem;font-weight:600">📞 تماس با آگهی‌دهنده</div>
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem">
+            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:white" id="owner-av">👤</div>
+            <div>
+              <div style="font-weight:700;font-size:0.95rem" id="owner-name"></div>
+              <div style="font-size:0.78rem;color:var(--text-muted)" id="owner-role"></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem" id="contact-btns"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex;flex-direction:column;gap:0.5rem" id="action-btns"></div>
+
+        <!-- Date & ID -->
+        <div style="text-align:center;margin-top:0.75rem;font-size:0.75rem;color:var(--text-muted)">
+          کد آگهی: <strong id="prop-code"></strong> | ثبت: <span id="prop-date"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Similar Properties -->
+  <div id="similar-wrap" style="display:none;background:var(--bg);padding:3rem 0">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">📋 آگهی‌های مشابه</h2>
+        <a href="/pages/properties.html" class="btn btn-ghost btn-sm">مشاهده همه ›</a>
+      </div>
+      <div class="property-grid" id="similar-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer style="background:#0A0F18;color:rgba(255,255,255,0.65);padding:3rem 0 0">
+  <div style="max-width:1200px;margin:0 auto;padding:0 1.25rem">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2.5rem;margin-bottom:2.5rem">
+      <div>
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem">
+          <div style="width:42px;height:42px;background:#1B4F72;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem">🏠</div>
+          <span style="color:white;font-size:1.1rem;font-weight:800">املاک میرحاج</span>
+        </div>
+        <p style="font-size:0.85rem;line-height:1.9">سامانه تخصصی معاملات ملکی منطقه جرقویه اصفهان.</p>
+      </div>
+      <div>
+        <h4 style="color:white;margin-bottom:1rem;font-size:0.95rem;font-weight:700">دسترسی سریع</h4>
+        <a href="/pages/index.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">صفحه اصلی</a>
+        <a href="/pages/properties.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">همه آگهی‌ها</a>
+        <a href="/pages/create-listing.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">ثبت آگهی رایگان</a>
+        <a href="/pages/ai-assistant.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">دستیار هوشمند</a>
+      </div>
+      <div>
+        <h4 style="color:white;margin-bottom:1rem;font-size:0.95rem;font-weight:700">دسته‌بندی</h4>
+        <a href="/pages/properties.html?type=apartment" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">آپارتمان</a>
+        <a href="/pages/properties.html?type=villa" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">ویلا</a>
+        <a href="/pages/properties.html?type=land" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">زمین</a>
+        <a href="/pages/properties.html?type=garden" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">باغ</a>
+      </div>
+      <div>
+        <h4 style="color:white;margin-bottom:1rem;font-size:0.95rem;font-weight:700">تماس با ما</h4>
+        <p style="font-size:0.85rem;line-height:2.2">
+          📞 <strong style="color:white">09132089979</strong><br>
+          📍 محمدآباد جرقویه<br>
+          اصفهان، ایران<br>
+          🕐 همه روزه ۱۰ تا ۲۱
+        </p>
+        <a href="tel:09132089979" style="display:inline-flex;align-items:center;gap:0.5rem;background:#27AE60;color:white;padding:0.5rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:600;margin-top:0.75rem;text-decoration:none">📞 تماس مستقیم</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.07);padding:1.25rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+      <span style="font-size:0.8rem">© ۱۴۰۵ تمامی حقوق برای <strong style="color:white">املاک میرحاج</strong> محفوظ است</span>
+      <span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">طراحی و توسعه با ❤️</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/main.js"></script>
+<script>
+  const urlP = new URLSearchParams(window.location.search);
+  const PID = urlP.get('id');
+  if (!PID) location.href = '/pages/properties.html';
+
+  const TYPES  = {apartment:'آپارتمان',villa:'ویلا',land:'زمین',commercial:'تجاری',workshop:'کارگاه',storage:'انباری',garden:'باغ',other:'سایر'};
+  const DEEDS  = {single_page:'تک برگ',mangooledar:'منگوله‌دار',gholanome:'قولنامه',mobayeeh:'مبایعه‌نامه',sabz:'سند سبز',zard:'سند زرد',other:'سایر'};
+  const ROLES  = {manager:'مدیر کل',agent:'مشاور',user:'کاربر'};
+  const AVS    = ['🏠','🏡','🏢','🏗️','🔑'];
+
+  let prop = null, imgIdx = 0;
+
+  async function load() {
+    const {ok, data} = await apiFetch(`/properties/${PID}`);
+    document.getElementById('loading').style.display = 'none';
+    if (!ok || !data.success) { document.getElementById('not-found').classList.remove('hidden'); return; }
+    prop = data.property;
+    render(prop);
+    document.getElementById('content').classList.remove('hidden');
+    loadSimilar(prop.id);
+    if (isLoggedIn()) checkBM(prop.id);
+  }
+
+  function render(p) {
+    document.title = `${p.title} - املاک میرحاج`;
+    document.getElementById('bc-title').textContent = p.title;
+    document.getElementById('print-btn').href = `/pages/print-listing.html?id=${p.id}`;
+    document.getElementById('prop-code').textContent = `MRJ-${String(p.id).padStart(4,'0')}`;
+    document.getElementById('prop-date').textContent = new Date(p.created_at).toLocaleDateString('fa-IR');
+
+    // Gallery
+    const imgs = p.images || [];
+    if (imgs.length > 0) {
+      renderGallery(imgs);
+    }
+
+    // Type & Title
+    document.getElementById('type-badge').textContent = TYPES[p.property_type] || p.property_type;
+    document.getElementById('prop-title').textContent = p.title;
+    document.getElementById('prop-loc').innerHTML = `📍 ${p.location_name || '---'}`;
+
+    // Price
+    document.getElementById('prop-price').textContent = formatPrice(p.total_price);
+    if (p.price_per_meter) document.getElementById('prop-ppm').textContent = `هر متر مربع: ${formatPrice(p.price_per_meter)}`;
+
+    // Quick Stats
+    const qs = [];
+    if (p.rooms) qs.push(`🛏️ ${p.rooms} اتاق`);
+    if (p.bathrooms) qs.push(`🚿 ${p.bathrooms} سرویس`);
+    if (p.area) qs.push(`📐 ${p.area} م²`);
+    if (p.building_age) qs.push(`🏗️ ${p.building_age} سال`);
+    if (p.floor) qs.push(`🏢 طبقه ${p.floor}`);
+    document.getElementById('quick-stats').innerHTML = qs.map(q => `<span class="badge badge-secondary">${q}</span>`).join('');
+
+    // Info Grid
+    const infos = [
+      {l:'نوع ملک', v: TYPES[p.property_type]||'---'},
+      {l:'نوع سند', v: DEEDS[p.deed_type]||'---'},
+      {l:'متراژ', v: p.area ? `${p.area} متر مربع` : '---'},
+      {l:'قیمت کل', v: formatPrice(p.total_price)},
+      {l:'قیمت هر متر', v: p.price_per_meter ? formatPrice(p.price_per_meter) : '---'},
+      {l:'تعداد اتاق', v: p.rooms ?? '۰'},
+      {l:'سرویس بهداشتی', v: p.bathrooms ?? '۰'},
+      {l:'سن بنا', v: p.building_age ? `${p.building_age} سال` : '---'},
+      {l:'طبقه', v: p.floor || '---'},
+      {l:'جهت ساختمان', v: p.direction || '---'},
+      {l:'منطقه', v: p.location_name || '---'},
+      {l:'وضعیت', v: p.active ? '✅ فعال' : '❌ غیرفعال'},
+    ];
+    document.getElementById('info-grid').innerHTML = infos.map(i =>
+      `<div class="info-item"><div class="lbl">${i.l}</div><div class="val">${i.v}</div></div>`).join('');
+
+    // Features
+    const feats = [
+      {l:'🚗 پارکینگ', has:!!p.parking},
+      {l:'📦 انباری', has:!!p.storage},
+      {l:'🛗 آسانسور', has:!!p.elevator},
+    ];
+    document.getElementById('feature-row').innerHTML = feats.map(f =>
+      `<span class="feature-chip ${f.has?'yes':'no'}">${f.l} ${f.has?'✅':'❌'}</span>`).join('');
+
+    // Description
+    if (p.description) {
+      document.getElementById('desc-card').style.display = '';
+      document.getElementById('prop-desc').textContent = p.description;
+    }
+
+    // Owner
+    document.getElementById('owner-av').textContent = AVS[(p.owner_avatar||1)-1] || '👤';
+    document.getElementById('owner-name').textContent = p.owner_name || '---';
+    document.getElementById('owner-role').textContent = ROLES[p.owner_role] || '';
+    if (p.owner_phone) {
+      document.getElementById('contact-btns').innerHTML = `
+        <a href="tel:${p.owner_phone}" class="btn-call">📞 تماس تلفنی</a>
+        <a href="https://wa.me/98${p.owner_phone.replace(/^0/,'')}" target="_blank" class="btn-wa">💬 ارسال پیام واتساپ</a>`;
+    }
+
+    // Action buttons
+    const me = getUser();
+    const btns = [];
+    if (me && me.id !== p.owner_id) {
+      btns.push(`<a href="/pages/messages.html?to=${p.owner_id}&property=${p.id}" class="btn btn-primary btn-block">💬 ارسال پیام به مالک</a>`);
+    }
+    if (me) {
+      const isOwner = me.id === p.owner_id;
+      const isMgr   = me.role === 'manager';
+      const isAgent = me.role === 'agent';
+      if (isOwner || isMgr || isAgent) {
+        btns.push(`<a href="/pages/edit-listing.html?id=${p.id}" class="btn btn-outline btn-block">✏️ ویرایش آگهی</a>`);
+      }
+      if (isOwner || isMgr) {
+        btns.push(`<button class="btn btn-danger btn-block" onclick="delProp(${p.id})">🗑️ حذف آگهی</button>`);
+      }
+    }
+    document.getElementById('action-btns').innerHTML = btns.join('');
+
+    // Map
+    if (p.map_lat && p.map_lng) {
+      document.getElementById('map-card').style.display = '';
+      setTimeout(() => {
+        const map = L.map('property-map').setView([p.map_lat, p.map_lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap'}).addTo(map);
+        L.marker([p.map_lat, p.map_lng]).addTo(map).bindPopup(`<b>${p.title}</b><br>${p.location_name}`).openPopup();
+      }, 200);
+    }
+  }
+
+  function renderGallery(imgs) {
+    const wrap = document.getElementById('gallery-wrap');
+    document.getElementById('gallery-no-img').remove();
+    wrap.innerHTML = `
+      <img id="main-img" class="gallery-main-img" src="/${imgs[0].filepath}" alt="">
+      <button class="gallery-nav-btn prev" onclick="prevImg()">›</button>
+      <button class="gallery-nav-btn next" onclick="nextImg()">‹</button>
+      <div class="gallery-counter" id="g-counter">۱ / ${imgs.length.toLocaleString('fa-IR')}</div>`;
+    document.getElementById('main-img').onclick = () => zoomImg(imgs[imgIdx].filepath);
+
+    if (imgs.length > 1) {
+      document.getElementById('gallery-thumbs').innerHTML = imgs.map((img,i) =>
+        `<div class="thumb ${i===0?'active':''}" id="th-${i}" onclick="goImg(${i})">
+          <img src="/${img.filepath}" alt=""></div>`).join('');
+    }
+  }
+
+  function goImg(idx) {
+    if (!prop?.images?.length) return;
+    imgIdx = idx;
+    const img = prop.images[idx];
+    document.getElementById('main-img').src = '/' + img.filepath;
+    document.getElementById('g-counter').textContent = `${(idx+1).toLocaleString('fa-IR')} / ${prop.images.length.toLocaleString('fa-IR')}`;
+    document.querySelectorAll('.thumb').forEach((t,i) => t.classList.toggle('active', i===idx));
+  }
+  function prevImg() { goImg((imgIdx-1+prop.images.length)%prop.images.length); }
+  function nextImg() { goImg((imgIdx+1)%prop.images.length); }
+
+  function zoomImg(fp) {
+    const ov = document.createElement('div');
+    ov.className = 'zoom-ov';
+    ov.innerHTML = `<button class="zoom-close" onclick="this.parentElement.remove()">✕</button><img src="/${fp}">`;
+    ov.addEventListener('click', e => { if (e.target===ov) ov.remove(); });
+    document.body.appendChild(ov);
+  }
+
+  async function toggleBM() {
+    if (!isLoggedIn()) { location.href='/pages/login.html'; return; }
+    const {data} = await apiFetch(`/bookmarks/${PID}`, {method:'POST'});
+    if (data.success) {
+      const btn = document.getElementById('bm-btn');
+      btn.textContent = data.bookmarked ? '🔖✅' : '🔖';
+      showToast(data.message, 'success');
+    }
+  }
+
+  async function checkBM(id) {
+    const {data} = await apiFetch(`/bookmarks/check/${id}`);
+    if (data.bookmarked) document.getElementById('bm-btn').textContent = '🔖✅';
+  }
+
+  function shareIt() {
+    const url = window.location.href;
+    if (navigator.share) navigator.share({title: prop?.title, url});
+    else navigator.clipboard.writeText(url).then(() => showToast('لینک کپی شد! 🔗', 'success'));
+  }
+
+  function addCmp() {
+    let list = JSON.parse(localStorage.getItem('mirhaj_compare')||'[]');
+    if (list.includes(parseInt(PID))) { showToast('قبلاً اضافه شده','info'); return; }
+    if (list.length>=3) { showToast('حداکثر ۳ ملک','warning'); return; }
+    list.push(parseInt(PID));
+    localStorage.setItem('mirhaj_compare', JSON.stringify(list));
+    showToast('به مقایسه اضافه شد ✅','success');
+  }
+
+  async function delProp(id) {
+    confirmAction('آیا مطمئن هستید؟ این عملیات قابل بازگشت نیست.', async () => {
+      const {ok, data} = await apiFetch(`/properties/${id}`, {method:'DELETE'});
+      if (ok && data.success) { showToast('آگهی حذف شد','success'); setTimeout(()=>location.href='/pages/properties.html',1000); }
+      else showToast(data.message||'خطا','error');
+    });
+  }
+
+  async function loadSimilar(id) {
+    const {data} = await apiFetch(`/similar/${id}`);
+    if (!data.success || !data.properties.length) return;
+    document.getElementById('similar-wrap').style.display = 'block';
+    document.getElementById('similar-grid').innerHTML = data.properties.map(buildPropertyCard).join('');
+  }
+
+  load();
+</script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

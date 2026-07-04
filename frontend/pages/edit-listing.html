@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ویرایش آگهی - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1B4F72">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="میرحاج">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <div class="brand-icon">🏠</div>
+      <span>املاک میرحاج</span>
+    </a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+      <li><a href="/pages/create-listing.html">➕ ثبت آگهی</a></li>
+      <li><a href="/pages/map-view.html">🗺️ نقشه</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth">
+        <a href="/pages/login.html" class="btn btn-outline btn-sm">ورود</a>
+        <a href="/pages/register.html" class="btn btn-primary btn-sm">ثبت‌نام</a>
+      </div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.3rem 0.75rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:110%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="/pages/profile.html" style="display:block;padding:0.6rem 1rem;font-size:0.88rem;color:var(--text-primary)">👤 پروفایل</a>
+            <a href="#" onclick="logout()" style="display:block;padding:0.6rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>✏️ ویرایش آگهی</h1>
+    <div class="breadcrumb">
+      <a href="/pages/index.html">خانه</a>
+      <span>ویرایش آگهی</span>
+    </div>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:3rem;max-width:860px">
+  <div id="loading" class="loading-overlay"><div class="spinner"></div><span>در حال بارگذاری...</span></div>
+  <div id="form-content" class="hidden">
+    <div id="form-alert"></div>
+
+    <!-- Basic Info -->
+    <div class="card mb-3">
+      <div class="card-header">📋 اطلاعات اصلی</div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">عنوان آگهی <span class="required">*</span></label>
+          <input type="text" class="form-control" id="title">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">نوع ملک <span class="required">*</span></label>
+            <select class="form-control" id="property_type">
+              <option value="apartment">آپارتمان</option>
+              <option value="villa">ویلا</option>
+              <option value="land">زمین</option>
+              <option value="commercial">تجاری</option>
+              <option value="workshop">کارگاه</option>
+              <option value="storage">انباری</option>
+              <option value="garden">باغ</option>
+              <option value="other">سایر</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">نوع سند <span class="required">*</span></label>
+            <select class="form-control" id="deed_type">
+              <option value="single_page">تک برگ</option>
+              <option value="mangooledar">منقوله‌دار</option>
+              <option value="other">سایر</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">منطقه <span class="required">*</span></label>
+          <select class="form-control" id="location_id"></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Price & Area -->
+    <div class="card mb-3">
+      <div class="card-header">💰 قیمت و متراژ</div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">متراژ (م²) <span class="required">*</span></label>
+            <input type="number" class="form-control" id="area" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">قیمت کل (تومان) <span class="required">*</span></label>
+            <input type="number" class="form-control" id="total_price" min="0" oninput="calcPPM()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">قیمت هر متر (تومان)</label>
+          <input type="number" class="form-control" id="price_per_meter">
+        </div>
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="card mb-3">
+      <div class="card-header">🏠 مشخصات ملک</div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem">
+          <div class="form-group">
+            <label class="form-label">تعداد اتاق</label>
+            <input type="number" class="form-control" id="rooms" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">سرویس بهداشتی</label>
+            <input type="number" class="form-control" id="bathrooms" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">سن بنا (سال)</label>
+            <input type="number" class="form-control" id="building_age" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">طبقه</label>
+            <input type="number" class="form-control" id="floor" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">جهت ساختمان</label>
+            <select class="form-control" id="direction">
+              <option value="">انتخاب کنید</option>
+              <option value="شمالی">شمالی</option>
+              <option value="جنوبی">جنوبی</option>
+              <option value="شرقی">شرقی</option>
+              <option value="غربی">غربی</option>
+              <option value="شمال شرقی">شمال شرقی</option>
+              <option value="شمال غربی">شمال غربی</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:2rem;margin-top:0.5rem;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight:500">
+            <input type="checkbox" id="parking" style="width:18px;height:18px"> 🚗 پارکینگ
+          </label>
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight:500">
+            <input type="checkbox" id="storage" style="width:18px;height:18px"> 📦 انباری
+          </label>
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight:500">
+            <input type="checkbox" id="elevator" style="width:18px;height:18px"> 🛗 آسانسور
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="card mb-3">
+      <div class="card-header">📝 توضیحات</div>
+      <div class="card-body">
+        <textarea class="form-control" id="description" rows="5"></textarea>
+      </div>
+    </div>
+
+    <!-- Images -->
+    <div class="card mb-3">
+      <div class="card-header">📸 تصاویر ملک <span style="font-size:0.8rem;font-weight:400;color:var(--text-muted)">(حداکثر ۳ تصویر)</span></div>
+      <div class="card-body">
+        <div class="image-grid" id="image-grid"></div>
+        <div id="upload-area" class="image-upload-area mt-2" onclick="document.getElementById('img-input').click()">
+          <div style="font-size:2rem;margin-bottom:0.5rem">📷</div>
+          <div style="font-weight:600">برای آپلود تصویر کلیک کنید</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);margin-top:0.25rem">JPG، PNG، WEBP - حداکثر ۵ مگابایت</div>
+        </div>
+        <input type="file" id="img-input" accept=".jpg,.jpeg,.png,.webp" style="display:none" onchange="uploadImage(this)">
+        <div id="upload-progress" class="hidden mt-2">
+          <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+            <div style="height:100%;background:var(--primary);width:0%;transition:width 0.3s" id="progress-bar"></div>
+          </div>
+          <div style="font-size:0.82rem;color:var(--text-muted);margin-top:0.3rem">در حال آپلود...</div>
+        </div>
+      </div>
+    </div>
+
+  
+    <!-- Map Location Picker -->
+    <div class="card mb-3">
+      <div class="card-header">🗺️ موقعیت روی نقشه <span style="font-size:0.8rem;font-weight:400;color:var(--text-muted)">(اختیاری)</span></div>
+      <div class="card-body">
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem">روی نقشه کلیک کنید تا موقعیت ملک ثبت شود</p>
+        <div id="map-picker" style="height:280px;border-radius:var(--radius);overflow:hidden;border:1.5px solid var(--border);z-index:1"></div>
+        <div style="display:flex;gap:1rem;margin-top:0.75rem">
+          <div class="form-group" style="margin:0;flex:1">
+            <label class="form-label">عرض جغرافیایی</label>
+            <input type="number" class="form-control" id="map_lat" placeholder="مثال: 32.6543" step="0.0001">
+          </div>
+          <div class="form-group" style="margin:0;flex:1">
+            <label class="form-label">طول جغرافیایی</label>
+            <input type="number" class="form-control" id="map_lng" placeholder="مثال: 51.8765" step="0.0001">
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button type="button" class="btn btn-ghost" onclick="clearMapPin()">🗑️ پاک</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- Submit -->
+    <div style="display:flex;gap:1rem;justify-content:flex-end">
+      <a href="/pages/properties.html" class="btn btn-ghost">انصراف</a>
+      <button class="btn btn-primary btn-lg" id="submit-btn" onclick="submitEdit()">💾 ذخیره تغییرات</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom"><p>© ۱۴۰۵ تمامی حقوق برای املاک میرحاج محفوظ است</p></div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script>
+  if (!requireAuth()) {}
+
+  const params = new URLSearchParams(window.location.search);
+  const propertyId = params.get('id');
+  if (!propertyId) location.href = '/pages/properties.html';
+
+  let currentImages = [];
+
+  function calcPPM() {
+    const area = parseFloat(document.getElementById('area').value);
+    const price = parseFloat(document.getElementById('total_price').value);
+    if (area > 0 && price > 0) document.getElementById('price_per_meter').value = Math.round(price / area);
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('area').addEventListener('input', calcPPM);
+  });
+
+  async function loadProperty() {
+    const { ok, data } = await apiFetch(`/properties/${propertyId}`);
+    document.getElementById('loading').style.display = 'none';
+    if (!ok || !data.success) { showToast('آگهی یافت نشد', 'error'); return; }
+
+    const p = data.property;
+    document.getElementById('form-content').classList.remove('hidden');
+
+    await loadLocations(document.getElementById('location_id'), p.location_id);
+
+    document.getElementById('title').value = p.title || '';
+    document.getElementById('property_type').value = p.property_type || '';
+    document.getElementById('deed_type').value = p.deed_type || '';
+    document.getElementById('area').value = p.area || '';
+    document.getElementById('total_price').value = p.total_price || '';
+    document.getElementById('price_per_meter').value = p.price_per_meter || '';
+    document.getElementById('rooms').value = p.rooms || 0;
+    document.getElementById('bathrooms').value = p.bathrooms || 0;
+    document.getElementById('building_age').value = p.building_age || '';
+    document.getElementById('floor').value = p.floor || '';
+    document.getElementById('direction').value = p.direction || '';
+    document.getElementById('parking').checked = !!p.parking;
+    document.getElementById('storage').checked = !!p.storage;
+    document.getElementById('elevator').checked = !!p.elevator;
+    document.getElementById('description').value = p.description || '';
+    document.getElementById('map_lat').value = p.map_lat || '';
+    document.getElementById('map_lng').value = p.map_lng || '';
+    setTimeout(() => { if(document.getElementById('map-picker')) initMapPicker(p.map_lat, p.map_lng); }, 200);
+
+    currentImages = p.images || [];
+    renderImages();
+  }
+
+  function renderImages() {
+    const grid = document.getElementById('image-grid');
+    const uploadArea = document.getElementById('upload-area');
+
+    if (currentImages.length >= 3) uploadArea.style.display = 'none';
+    else uploadArea.style.display = '';
+
+    grid.innerHTML = currentImages.map(img => `
+      <div class="image-preview ${img.is_primary ? 'is-primary' : ''}" id="img-${img.id}">
+        <img src="/${img.filepath}" alt="">
+        <div class="img-actions">
+          ${!img.is_primary ? `<button class="btn btn-sm btn-primary" onclick="setPrimary(${img.id})">اصلی</button>` : ''}
+          <button class="btn btn-sm btn-danger" onclick="removeImage(${img.id})">🗑️</button>
+        </div>
+      </div>`).join('');
+  }
+
+  async function uploadImage(input) {
+    if (!input.files[0]) return;
+    const progress = document.getElementById('upload-progress');
+    const bar = document.getElementById('progress-bar');
+    progress.classList.remove('hidden');
+    bar.style.width = '30%';
+
+    const formData = new FormData();
+    formData.append('image', input.files[0]);
+
+    bar.style.width = '60%';
+    const { ok, data } = await apiFetch(`/properties/${propertyId}/images`, {
+      method: 'POST', body: formData
+    });
+    bar.style.width = '100%';
+    setTimeout(() => { progress.classList.add('hidden'); bar.style.width = '0%'; }, 500);
+    input.value = '';
+
+    if (ok && data.success) {
+      currentImages.push(data.image);
+      renderImages();
+      showToast('تصویر آپلود شد ✅', 'success');
+    } else {
+      showToast(data.message || 'خطا در آپلود', 'error');
+    }
+  }
+
+  async function removeImage(imgId) {
+    confirmAction('تصویر حذف شود؟', async () => {
+      const { ok, data } = await apiFetch(`/images/${imgId}`, { method: 'DELETE' });
+      if (ok && data.success) {
+        currentImages = currentImages.filter(i => i.id !== imgId);
+        renderImages();
+        showToast('تصویر حذف شد', 'success');
+      } else showToast(data.message || 'خطا', 'error');
+    });
+  }
+
+  async function setPrimary(imgId) {
+    const { ok, data } = await apiFetch(`/images/${imgId}/primary`, { method: 'PUT' });
+    if (ok && data.success) {
+      currentImages.forEach(i => i.is_primary = i.id === imgId ? 1 : 0);
+      renderImages();
+      showToast('تصویر اصلی تغییر کرد', 'success');
+    }
+  }
+
+  async function submitEdit() {
+    const alertEl = document.getElementById('form-alert');
+    const btn = document.getElementById('submit-btn');
+    alertEl.innerHTML = '';
+
+    const title = document.getElementById('title').value.trim();
+    const property_type = document.getElementById('property_type').value;
+    const deed_type = document.getElementById('deed_type').value;
+    const location_id = document.getElementById('location_id').value;
+    const area = document.getElementById('area').value;
+    const total_price = document.getElementById('total_price').value;
+
+    if (!title || !property_type || !deed_type || !location_id || !area || !total_price) {
+      alertEl.innerHTML = `<div class="alert alert-warning">⚠️ فیلدهای الزامی را پر کنید</div>`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner spinner-sm"></div> در حال ذخیره...`;
+
+    const { ok, data } = await apiFetch(`/properties/${propertyId}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        title, property_type, deed_type,
+        location_id: parseInt(location_id),
+        area: parseFloat(area),
+        total_price: parseFloat(total_price),
+        price_per_meter: document.getElementById('price_per_meter').value || null,
+        rooms: parseInt(document.getElementById('rooms').value) || 0,
+        bathrooms: parseInt(document.getElementById('bathrooms').value) || 0,
+        building_age: document.getElementById('building_age').value || null,
+        floor: document.getElementById('floor').value || null,
+        direction: document.getElementById('direction').value || null,
+        parking: document.getElementById('parking').checked,
+        storage: document.getElementById('storage').checked,
+        elevator: document.getElementById('elevator').checked,
+        description: document.getElementById('description').value.trim() || null,
+        map_lat: document.getElementById('map_lat').value ? parseFloat(document.getElementById('map_lat').value) : null,
+        map_lng: document.getElementById('map_lng').value ? parseFloat(document.getElementById('map_lng').value) : null,
+      })
+    });
+
+    btn.disabled = false;
+    btn.innerHTML = '💾 ذخیره تغییرات';
+
+    if (ok && data.success) {
+      showToast('آگهی با موفقیت ویرایش شد ✅', 'success');
+      setTimeout(() => location.href = `/pages/property-detail.html?id=${propertyId}`, 1000);
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-danger">❌ ${data.message || 'خطا در ذخیره'}</div>`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  loadProperty();
+</script>
+
+<script src="/js/pwa.js"></script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ثبت‌نام - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/protect.js"></script>
+</head>
+<body style="background:linear-gradient(135deg,var(--primary-dark),var(--primary-light));min-height:100vh;display:flex;flex-direction:column">
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <img src="/assets/logo-small.svg" alt="املاک میرحاج" style="height:40px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="brand-icon" style="display:none">🏠</div>
+      <span>املاک میرحاج</span>
+    </a>
+    <div class="navbar-actions">
+      <a href="/pages/login.html" class="btn btn-outline btn-sm">ورود</a>
+    </div>
+  </div>
+</nav>
+
+<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem">
+  <div style="width:100%;max-width:480px">
+
+    <div style="text-align:center;margin-bottom:1.5rem;color:white">
+      <div style="font-size:3rem;margin-bottom:0.5rem">📝</div>
+      <h1 style="font-size:1.6rem">ساخت حساب کاربری</h1>
+      <p style="opacity:0.8;margin-top:0.4rem">به خانواده میرحاج بپیوندید</p>
+    </div>
+
+    <div class="card">
+      <div class="card-body" style="padding:2rem">
+        <div id="register-alert"></div>
+
+        <!-- Avatar Selection -->
+        <div class="form-group">
+          <label class="form-label">آواتار خود را انتخاب کنید</label>
+          <div class="avatar-grid" id="avatar-grid">
+            <div class="avatar-option selected" data-avatar="1" onclick="selectAvatar(1)">🏠</div>
+            <div class="avatar-option" data-avatar="2" onclick="selectAvatar(2)">🏡</div>
+            <div class="avatar-option" data-avatar="3" onclick="selectAvatar(3)">🏢</div>
+            <div class="avatar-option" data-avatar="4" onclick="selectAvatar(4)">🏗️</div>
+            <div class="avatar-option" data-avatar="5" onclick="selectAvatar(5)">🔑</div>
+          </div>
+          <input type="hidden" id="selected-avatar" value="1">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">نام کاربری <span class="required">*</span></label>
+            <input type="text" class="form-control" id="username" placeholder="مثال: ali123">
+          </div>
+          <div class="form-group">
+            <label class="form-label">نام کامل <span class="required">*</span></label>
+            <input type="text" class="form-control" id="full_name" placeholder="نام و نام خانوادگی">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">رمز عبور <span class="required">*</span></label>
+          <div style="position:relative">
+            <input type="password" class="form-control" id="password" placeholder="رمز عبور انتخاب کنید">
+            <button type="button" onclick="togglePwd()"
+              style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.1rem;cursor:pointer">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">شماره تماس</label>
+            <input type="tel" class="form-control" id="phone" placeholder="۰۹۱۲XXXXXXX">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ایمیل</label>
+            <input type="email" class="form-control" id="email" placeholder="example@email.com">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">محل سکونت</label>
+          <select class="form-control" id="location"></select>
+        </div>
+
+        <button class="btn btn-primary btn-block btn-lg" id="register-btn" onclick="doRegister()">
+          ثبت‌نام
+        </button>
+
+        <div style="text-align:center;margin-top:1.25rem;font-size:0.9rem;color:var(--text-muted)">
+          قبلاً ثبت‌نام کرده‌اید؟
+          <a href="/pages/login.html" style="color:var(--primary);font-weight:600">وارد شوید</a>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:1.5rem;color:rgba(255,255,255,0.6);font-size:0.8rem">
+      📞 09132089979 | محمدآباد جرقویه
+    </div>
+  </div>
+</div>
+
+<script src="/js/main.js"></script>
+<script>
+  if (isLoggedIn()) location.href = '/pages/index.html';
+
+  // Load locations
+  loadLocations(document.getElementById('location'));
+
+  function togglePwd() {
+    const p = document.getElementById('password');
+    p.type = p.type === 'password' ? 'text' : 'password';
+  }
+
+  function selectAvatar(n) {
+    document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+    document.querySelector(`[data-avatar="${n}"]`).classList.add('selected');
+    document.getElementById('selected-avatar').value = n;
+  }
+
+  async function doRegister() {
+    const alertEl = document.getElementById('register-alert');
+    const btn = document.getElementById('register-btn');
+
+    const username  = document.getElementById('username').value.trim();
+    const full_name = document.getElementById('full_name').value.trim();
+    const password  = document.getElementById('password').value;
+    const phone     = document.getElementById('phone').value.trim();
+    const email     = document.getElementById('email').value.trim();
+    const location  = document.getElementById('location').value;
+    const avatar    = document.getElementById('selected-avatar').value;
+
+    alertEl.innerHTML = '';
+
+    if (!username || !full_name || !password) {
+      alertEl.innerHTML = `<div class="alert alert-warning">⚠️ نام کاربری، نام کامل و رمز عبور الزامی هستند</div>`;
+      return;
+    }
+
+    if (username.length < 3) {
+      alertEl.innerHTML = `<div class="alert alert-warning">⚠️ نام کاربری باید حداقل ۳ کاراکتر باشد</div>`;
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner spinner-sm"></div> در حال ثبت‌نام...`;
+
+    const { ok, data } = await apiFetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, full_name, password, phone, email, location, avatar: parseInt(avatar) })
+    });
+
+    btn.disabled = false;
+    btn.innerHTML = 'ثبت‌نام';
+
+    if (ok && data.success) {
+      setAuth(data.token, data.user);
+      showToast('ثبت‌نام موفق! خوش آمدید 🎉', 'success');
+      setTimeout(() => location.href = '/pages/dashboard-user.html', 800);
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-danger">❌ ${data.message || 'خطا در ثبت‌نام'}</div>`;
+    }
+  }
+</script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

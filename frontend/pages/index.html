@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="خرید و فروش ملک در جرقویه، آپارتمان و ویلا و زمین در نصرآباد محمدآباد نیک آباد">
+  <meta name="keywords" content="ملک جرقویه، خرید ملک اصفهان، فروش زمین نصرآباد، آپارتمان محمدآباد، اجاره ملک جرقویه">
+  <meta name="author" content="املاک میرحاج">
+  <meta property="og:title" content="املاک میرحاج - خرید، فروش، رهن و اجاره ملک در جرقویه اصفهان">
+  <meta property="og:description" content="خرید و فروش ملک در جرقویه، آپارتمان و ویلا و زمین در نصرآباد محمدآباد نیک آباد">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fa_IR">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="املاک میرحاج - خرید، فروش، رهن و اجاره ملک در جرقویه اصفهان">
+  <link rel="canonical" href="http://localhost:3000/pages/index.html">
+  <title>املاک میرحاج - معاملات ملکی جرقویه</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <style>
+    .hero {
+      background: linear-gradient(135deg, #0D1B2A 0%, #1B4F72 60%, #2E86C1 100%);
+      min-height: 540px;
+      display: flex; align-items: center;
+      position: relative; overflow: hidden; padding: 3rem 0;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; position: relative; z-index: 1; }
+    .hero-left h1 { font-size: 2.6rem; font-weight: 900; color: white; line-height: 1.3; margin-bottom: 1rem; }
+    .hero-left h1 span { color: #F39C12; }
+    .hero-left p { color: rgba(255,255,255,0.82); font-size: 1rem; line-height: 1.9; margin-bottom: 2rem; }
+    .hero-badges { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .hero-badge { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 20px; padding: 0.3rem 0.85rem; font-size: 0.8rem; backdrop-filter: blur(8px); }
+    .hero-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+    .hero-stat { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1rem; text-align: center; color: white; }
+    .hero-stat strong { display: block; font-size: 2rem; font-weight: 900; color: #F39C12; }
+    .hero-stat span { font-size: 0.75rem; opacity: 0.75; }
+    .hero-search { background: white; border-radius: 20px; padding: 1.75rem; box-shadow: 0 25px 70px rgba(0,0,0,0.35); }
+    .hero-search h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+    .search-tabs { display: flex; gap: 0.35rem; margin-bottom: 1.25rem; background: var(--bg); border-radius: 10px; padding: 0.3rem; }
+    .search-tab { flex: 1; padding: 0.5rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--text-secondary); transition: var(--transition); }
+    .search-tab.active { background: white; color: var(--primary); box-shadow: var(--shadow-sm); }
+    .type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 0.85rem; }
+    .type-card { background: white; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.1rem 0.75rem; text-align: center; cursor: pointer; transition: all 0.25s ease; }
+    .type-card:hover { border-color: var(--primary); background: #EBF5FB; transform: translateY(-4px); box-shadow: var(--shadow); }
+    .type-card .icon { font-size: 2rem; margin-bottom: 0.4rem; }
+    .type-card .name { font-weight: 700; font-size: 0.82rem; }
+    .why-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 1.5rem; }
+    .why-card { text-align: center; padding: 2rem 1.5rem; border-radius: var(--radius-lg); background: white; border: 1.5px solid var(--border); transition: var(--transition); }
+    .why-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); border-color: var(--primary-light); }
+    .why-icon { width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 16px; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+    .contact-strip { background: linear-gradient(135deg, #0D1B2A, #1B4F72); color: white; padding: 2.5rem 0; }
+    .contact-strip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 2rem; align-items: center; }
+    .contact-item { display: flex; align-items: center; gap: 1rem; }
+    .contact-icon { width: 50px; height: 50px; background: rgba(255,255,255,0.12); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.15); }
+    .contact-label { font-size: 0.75rem; opacity: 0.72; margin-bottom: 0.2rem; }
+    .contact-value { font-weight: 700; font-size: 1rem; }
+    .footer-new { background: #0A0F18; color: rgba(255,255,255,0.65); padding: 3rem 0 1.5rem; margin-top: 0; }
+    .footer-new-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2.5rem; margin-bottom: 2rem; }
+    .footer-new h4 { color: white; margin-bottom: 1rem; font-size: 0.95rem; font-weight: 700; }
+    .footer-new p { font-size: 0.84rem; line-height: 1.9; }
+    .footer-new a { color: rgba(255,255,255,0.5); font-size: 0.84rem; display: block; margin-bottom: 0.5rem; transition: color 0.2s; }
+    .footer-new a:hover { color: white; }
+    .footer-logo-wrap { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+    .footer-logo-icon { width: 42px; height: 42px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+    .footer-divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 0 0 1.5rem; }
+    .footer-bottom { display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; flex-wrap: wrap; gap: 1rem; }
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-left h1 { font-size: 1.8rem; }
+      .footer-new-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .hero { min-height: auto; padding: 2rem 0; }
+      .hero-stats { gap: 0.5rem; }
+      .hero-stat strong { font-size: 1.4rem; }
+      .footer-new-grid { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <div class="brand-icon">🏠</div>
+      <span>املاک میرحاج</span>
+    </a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+      <li><a href="/pages/map-view.html">🗺️ نقشه</a></li>
+      <li><a href="/pages/ai-assistant.html">🤖 دستیار AI</a></li>
+      <li><a href="/pages/compare.html">🔄 مقایسه</a></li>
+      <li><a href="/pages/messages.html">💬 پیام‌ها</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth" style="display:flex;gap:0.4rem">
+        <a href="/pages/login.html" class="btn btn-ghost btn-sm">ورود</a>
+        <a href="/pages/register.html" class="btn btn-primary btn-sm">ثبت‌نام</a>
+      </div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="/pages/create-listing.html" class="btn btn-accent btn-sm">➕ ثبت آگهی</a>
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.35rem 0.85rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:115%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:190px;z-index:999;padding:0.5rem 0">
+            <a href="/pages/dashboard-user.html" style="display:flex;align-items:center;gap:0.7rem;padding:0.7rem 1rem;font-size:0.88rem;color:var(--text-primary)">👤 داشبورد من</a>
+            <a href="/pages/bookmarks.html" style="display:flex;align-items:center;gap:0.7rem;padding:0.7rem 1rem;font-size:0.88rem;color:var(--text-primary)">🔖 علاقه‌مندی‌ها</a>
+            <a href="/pages/messages.html" style="display:flex;align-items:center;gap:0.7rem;padding:0.7rem 1rem;font-size:0.88rem;color:var(--text-primary)">💬 پیام‌ها</a>
+            <a href="/pages/notifications.html" style="display:flex;align-items:center;gap:0.7rem;padding:0.7rem 1rem;font-size:0.88rem;color:var(--text-primary)">🔔 اطلاعیه‌ها</a>
+            <hr style="margin:0.4rem 0;border:none;border-top:1px solid var(--border)">
+            <a href="#" onclick="logout()" style="display:flex;align-items:center;gap:0.7rem;padding:0.7rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <div class="hero-badges">
+          <span class="hero-badge">🏆 بهترین مشاور منطقه</span>
+          <span class="hero-badge">✅ معاملات تضمینی</span>
+          <span class="hero-badge">📍 جرقویه اصفهان</span>
+        </div>
+        <h1>بهترین ملک را در <span>جرقویه</span> پیدا کنید</h1>
+        <p>خرید، فروش، رهن و اجاره انواع ملک در محمدآباد، نصرآباد، نیک‌آباد و تمام روستاهای منطقه با مشاوره تخصصی رایگان</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><strong id="stat-props">۰</strong><span>آگهی فعال</span></div>
+          <div class="hero-stat"><strong id="stat-users">۰</strong><span>کاربر عضو</span></div>
+          <div class="hero-stat"><strong>۱۲</strong><span>منطقه</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-top:1rem;color:rgba(255,255,255,0.75);font-size:0.82rem">
+          <span style="width:8px;height:8px;background:#27AE60;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>
+          <span id="online-count">۰</span> نفر همین الان آنلاین هستند
+        </div>
+      </div>
+      <div class="hero-search">
+        <h3>🔍 جستجوی سریع ملک</h3>
+        <div class="search-tabs">
+          <button class="search-tab active" onclick="setTab(this)">🏠 خرید</button>
+          <button class="search-tab" onclick="setTab(this)">🔑 رهن و اجاره</button>
+          <button class="search-tab" onclick="setTab(this)">🤝 مشاوره</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.85rem">
+          <div>
+            <label style="font-size:0.82rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.35rem;display:block">نوع ملک</label>
+            <select class="form-control" id="s-type">
+              <option value="">همه انواع ملک</option>
+              <option value="apartment">🏢 آپارتمان</option>
+              <option value="villa">🏡 ویلا</option>
+              <option value="land">🌿 زمین</option>
+              <option value="commercial">🏪 تجاری</option>
+              <option value="garden">🌳 باغ</option>
+              <option value="workshop">🔧 کارگاه</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.82rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.35rem;display:block">منطقه</label>
+            <select class="form-control" id="s-location"></select>
+          </div>
+          <div>
+            <label style="font-size:0.82rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.35rem;display:block">جستجوی متن</label>
+            <input type="text" class="form-control" id="s-text" placeholder="عنوان یا توضیحات آگهی...">
+          </div>
+          <button class="btn btn-primary btn-block" style="padding:0.85rem;font-size:1rem;border-radius:12px" onclick="doSearch()">
+            🔍 جستجو در آگهی‌ها
+          </button>
+          <a href="/pages/properties.html" style="text-align:center;font-size:0.82rem;color:var(--text-muted);display:block">مشاهده همه آگهی‌ها ›</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TYPE CARDS -->
+<section style="background:white;padding:2rem 0;border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div class="type-grid">
+      <div class="type-card" onclick="location.href='/pages/properties.html?type=apartment'"><div class="icon">🏢</div><div class="name">آپارتمان</div></div>
+      <div class="type-card" onclick="location.href='/pages/properties.html?type=villa'"><div class="icon">🏡</div><div class="name">ویلا</div></div>
+      <div class="type-card" onclick="location.href='/pages/properties.html?type=land'"><div class="icon">🌿</div><div class="name">زمین</div></div>
+      <div class="type-card" onclick="location.href='/pages/properties.html?type=commercial'"><div class="icon">🏪</div><div class="name">تجاری</div></div>
+      <div class="type-card" onclick="location.href='/pages/properties.html?type=garden'"><div class="icon">🌳</div><div class="name">باغ</div></div>
+      <div class="type-card" onclick="location.href='/pages/properties.html?type=workshop'"><div class="icon">🔧</div><div class="name">کارگاه</div></div>
+      <div class="type-card" onclick="location.href='/pages/properties.html?type=storage'"><div class="icon">📦</div><div class="name">انباری</div></div>
+      <div class="type-card" onclick="location.href='/pages/properties.html?type=other'"><div class="icon">🏠</div><div class="name">سایر</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LATEST PROPERTIES -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">جدیدترین آگهی‌ها</h2>
+      <a href="/pages/properties.html" class="btn btn-ghost btn-sm">مشاهده همه ›</a>
+    </div>
+    <div class="property-grid" id="latest-grid">
+      <div id="skeleton-wrap" style="display:contents"></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="section" style="background:var(--bg)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:2.5rem">
+      <h2 style="font-size:1.6rem;font-weight:800">چرا املاک میرحاج؟</h2>
+      <p style="color:var(--text-muted);margin-top:0.5rem;font-size:0.95rem">سال‌ها تجربه در معاملات ملکی منطقه جرقویه اصفهان</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">🏆</div>
+        <h4>تجربه و تخصص</h4>
+        <p style="color:var(--text-muted);font-size:0.85rem;line-height:1.8">سال‌ها تجربه در بازار ملک منطقه جرقویه و آشنایی کامل با قیمت‌های روز منطقه</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🤝</div>
+        <h4>مشاوره رایگان</h4>
+        <p style="color:var(--text-muted);font-size:0.85rem;line-height:1.8">مشاوره تخصصی کاملاً رایگان برای خرید، فروش و رهن و اجاره در تمام مناطق</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">📋</div>
+        <h4>اسناد معتبر</h4>
+        <p style="color:var(--text-muted);font-size:0.85rem;line-height:1.8">انجام تمام مراحل قانونی و ثبتی معاملات با اطمینان کامل از صحت اسناد</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">⚡</div>
+        <h4>سرعت در معامله</h4>
+        <p style="color:var(--text-muted);font-size:0.85rem;line-height:1.8">پیدا کردن سریع ملک مناسب و انجام معامله در کوتاه‌ترین زمان ممکن</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT STRIP -->
+<div class="contact-strip">
+  <div class="container">
+    <div class="contact-strip-grid">
+      <div class="contact-item">
+        <div class="contact-icon">📞</div>
+        <div>
+          <div class="contact-label">تماس مستقیم</div>
+          <div class="contact-value">09132089979</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">📍</div>
+        <div>
+          <div class="contact-label">آدرس دفتر</div>
+          <div class="contact-value">محمدآباد جرقویه اصفهان</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">🕐</div>
+        <div>
+          <div class="contact-label">ساعت کاری</div>
+          <div class="contact-value">همه روزه ۱۰ صبح تا ۹ شب</div>
+        </div>
+      </div>
+      <div style="text-align:left">
+        <a href="/pages/create-listing.html" class="btn btn-accent btn-lg" style="border-radius:12px">
+          ➕ ثبت آگهی رایگان
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer style="background:#0A0F18;color:rgba(255,255,255,0.65);padding:3rem 0 0;margin-top:3rem">
+  <div style="max-width:1200px;margin:0 auto;padding:0 1.25rem">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2.5rem;margin-bottom:2.5rem;flex-wrap:wrap">
+      <div>
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem">
+          <div style="width:42px;height:42px;background:#1B4F72;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem">🏠</div>
+          <span style="color:white;font-size:1.1rem;font-weight:800">املاک میرحاج</span>
+        </div>
+        <p style="font-size:0.85rem;line-height:1.9;margin-bottom:1rem">سامانه تخصصی معاملات ملکی منطقه جرقویه اصفهان. خرید، فروش، رهن و اجاره انواع ملک با مشاوره حرفه‌ای.</p>
+      </div>
+      <div>
+        <h4 style="color:white;margin-bottom:1rem;font-size:0.95rem;font-weight:700">دسترسی سریع</h4>
+        <a href="/pages/index.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">صفحه اصلی</a>
+        <a href="/pages/properties.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">همه آگهی‌ها</a>
+        <a href="/pages/create-listing.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">ثبت آگهی رایگان</a>
+        <a href="/pages/ai-assistant.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">دستیار هوشمند</a>
+        <a href="/pages/map-view.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">نقشه آگهی‌ها</a>
+      </div>
+      <div>
+        <h4 style="color:white;margin-bottom:1rem;font-size:0.95rem;font-weight:700">دسته‌بندی</h4>
+        <a href="/pages/properties.html?type=apartment" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">آپارتمان</a>
+        <a href="/pages/properties.html?type=villa" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">ویلا</a>
+        <a href="/pages/properties.html?type=land" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">زمین</a>
+        <a href="/pages/properties.html?type=garden" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">باغ</a>
+        <a href="/pages/properties.html?type=commercial" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">تجاری</a>
+      </div>
+      <div>
+        <h4 style="color:white;margin-bottom:1rem;font-size:0.95rem;font-weight:700">تماس با ما</h4>
+        <p style="font-size:0.85rem;line-height:2.2">
+          📞 <strong style="color:white">09132089979</strong><br>
+          📍 محمدآباد جرقویه<br>
+          اصفهان، ایران<br>
+          🕐 همه روزه ۱۰ تا ۲۱
+        </p>
+        <a href="tel:09132089979" style="display:inline-flex;align-items:center;gap:0.5rem;background:#27AE60;color:white;padding:0.5rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:600;margin-top:0.75rem;text-decoration:none">📞 تماس مستقیم</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.07);padding:1.25rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+      <span style="font-size:0.8rem">© ۱۴۰۵ تمامی حقوق برای <strong style="color:white">املاک میرحاج</strong> محفوظ است</span>
+      <span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">طراحی و توسعه با ❤️</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script>
+<script>
+  function setTab(btn) {
+    document.querySelectorAll('.search-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function doSearch() {
+    const type = document.getElementById('s-type').value;
+    const loc  = document.getElementById('s-location').value;
+    const text = document.getElementById('s-text').value.trim();
+    const p = new URLSearchParams();
+    if (type) p.set('type', type);
+    if (loc)  p.set('location_id', loc);
+    if (text) p.set('search', text);
+    location.href = '/pages/properties.html?' + p.toString();
+  }
+
+  document.getElementById('s-text').addEventListener('keypress', e => { if (e.key === 'Enter') doSearch(); });
+
+  async function init() {
+    await loadLocations(document.getElementById('s-location'));
+
+    // Stats
+    const { data: sd } = await apiFetch('/admin/stats').catch(() => ({data:{success:false}}));
+    if (sd?.success) {
+      animateCounter(document.getElementById('stat-props'), sd.stats.activeProperties);
+      animateCounter(document.getElementById('stat-users'), sd.stats.totalUsers);
+    }
+
+    // Latest properties with skeleton
+    document.getElementById('latest-grid').innerHTML = buildSkeletonCards(6);
+    const { data } = await apiFetch('/properties?limit=6&page=1');
+    if (data.success && data.properties.length > 0) {
+      document.getElementById('latest-grid').innerHTML = data.properties.map(buildPropertyCard).join('');
+    } else {
+      document.getElementById('latest-grid').innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-icon">🏠</div>
+          <h3>هنوز آگهی‌ای ثبت نشده</h3>
+          <a href="/pages/create-listing.html" class="btn btn-primary mt-2">اولین آگهی را ثبت کنید</a>
+        </div>`;
+    }
+  }
+
+  init();
+</script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="جستجو در آگهی‌های خرید و فروش ملک در منطقه جرقویه اصفهان">
+  <meta name="keywords" content="ملک جرقویه، خرید ملک اصفهان، فروش زمین نصرآباد، آپارتمان محمدآباد، اجاره ملک جرقویه">
+  <meta name="author" content="املاک میرحاج">
+  <meta property="og:title" content="آگهی‌های ملکی جرقویه - خرید فروش رهن اجاره">
+  <meta property="og:description" content="جستجو در آگهی‌های خرید و فروش ملک در منطقه جرقویه اصفهان">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fa_IR">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="آگهی‌های ملکی جرقویه - خرید فروش رهن اجاره">
+  <link rel="canonical" href="http://localhost:3000/pages/properties.html">
+  <title>آگهی‌های ملکی - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <style>
+    .page-layout { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; }
+    .filter-panel { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; position: sticky; top: calc(var(--nav-height) + 1rem); max-height: calc(100vh - 90px); overflow-y: auto; }
+    .filter-panel-header { padding: 1rem 1.25rem; background: var(--primary); color: white; display: flex; align-items: center; justify-content: space-between; }
+    .filter-panel-header h3 { font-size: 0.95rem; font-weight: 700; }
+    .filter-section { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+    .filter-section:last-child { border-bottom: none; }
+    .filter-section-title { font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .view-toggle { display: flex; background: var(--bg); border-radius: 8px; padding: 0.2rem; gap: 0.2rem; }
+    .view-btn { width: 32px; height: 32px; border: none; border-radius: 6px; background: transparent; cursor: pointer; font-size: 0.95rem; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+    .view-btn.active { background: white; box-shadow: var(--shadow-sm); }
+    .list-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); display: flex; gap: 0; overflow: hidden; transition: var(--transition); }
+    .list-card:hover { box-shadow: var(--shadow); border-color: var(--primary-light); transform: translateX(-2px); }
+    .list-card-img { width: 220px; flex-shrink: 0; overflow: hidden; position: relative; }
+    .list-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+    .list-card:hover .list-card-img img { transform: scale(1.05); }
+    .list-card-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .rooms-filter { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .room-btn { padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--text-secondary); transition: var(--transition); }
+    .room-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .mobile-filter-toggle { display: none; }
+    @media (max-width: 900px) {
+      .page-layout { grid-template-columns: 1fr; }
+      .filter-panel { position: static; max-height: none; display: none; }
+      .filter-panel.open { display: block; }
+      .mobile-filter-toggle { display: flex; }
+      .list-card-img { width: 140px; }
+    }
+    @media (max-width: 600px) {
+      .list-card { flex-direction: column; }
+      .list-card-img { width: 100%; height: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <img src="/assets/logo-small.svg" alt="املاک میرحاج" style="height:40px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="brand-icon" style="display:none">🏠</div>
+      <span>املاک میرحاج</span>
+    </a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+      <li><a href="/pages/map-view.html">🗺️ نقشه</a></li>
+      <li><a href="/pages/ai-assistant.html">🤖 دستیار AI</a></li>
+      <li><a href="/pages/compare.html">🔄 مقایسه</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth" style="display:flex;gap:0.4rem">
+        <a href="/pages/login.html" class="btn btn-ghost btn-sm">ورود</a>
+        <a href="/pages/register.html" class="btn btn-primary btn-sm">ثبت‌نام</a>
+      </div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="/pages/create-listing.html" class="btn btn-accent btn-sm">➕ ثبت آگهی</a>
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.35rem 0.85rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:115%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="/pages/bookmarks.html" style="display:block;padding:0.65rem 1rem;font-size:0.88rem">🔖 علاقه‌مندی‌ها</a>
+            <a href="#" onclick="logout()" style="display:block;padding:0.65rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+      <div>
+        <h1>🔍 جستجوی آگهی‌ها</h1>
+        <div class="breadcrumb"><a href="/pages/index.html">خانه</a><span>آگهی‌ها</span></div>
+      </div>
+      <button class="btn btn-outline mobile-filter-toggle" onclick="document.querySelector('.filter-panel').classList.toggle('open')">
+        ⚙️ فیلترها
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:3rem">
+
+  <!-- Type Tags -->
+  <div class="tag-filters mt-2 mb-3" id="type-tags">
+    <button class="tag-filter active" data-value="">همه</button>
+    <button class="tag-filter" data-value="apartment">🏢 آپارتمان</button>
+    <button class="tag-filter" data-value="villa">🏡 ویلا</button>
+    <button class="tag-filter" data-value="land">🌿 زمین</button>
+    <button class="tag-filter" data-value="commercial">🏪 تجاری</button>
+    <button class="tag-filter" data-value="garden">🌳 باغ</button>
+    <button class="tag-filter" data-value="workshop">🔧 کارگاه</button>
+    <button class="tag-filter" data-value="storage">📦 انباری</button>
+  </div>
+
+  <div class="page-layout">
+
+    <!-- Filters -->
+    <div class="filter-panel">
+      <div class="filter-panel-header">
+        <h3>⚙️ فیلترها</h3>
+        <button onclick="clearFilters()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:6px;padding:0.25rem 0.65rem;font-size:0.78rem;cursor:pointer">پاک کردن</button>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-section-title">جستجوی متن</div>
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="form-control" id="filter-search" placeholder="عنوان یا توضیحات...">
+        </div>
+        <div class="search-suggestions" id="search-suggestions" style="display:none"></div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-section-title">منطقه</div>
+        <select class="form-control" id="filter-location" onchange="applyFilters()"></select>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-section-title">تعداد اتاق</div>
+        <div class="rooms-filter">
+          <button class="room-btn active" onclick="setRooms('',this)">همه</button>
+          <button class="room-btn" onclick="setRooms('1',this)">۱+</button>
+          <button class="room-btn" onclick="setRooms('2',this)">۲+</button>
+          <button class="room-btn" onclick="setRooms('3',this)">۳+</button>
+          <button class="room-btn" onclick="setRooms('4',this)">۴+</button>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-section-title">محدوده قیمت</div>
+        <div class="range-value" id="price-display" style="margin-bottom:0.5rem">همه قیمت‌ها</div>
+        <input type="range" id="slider-min-price" min="0" max="20000000000" step="100000000" value="0">
+        <input type="range" id="slider-max-price" min="0" max="20000000000" step="100000000" value="20000000000" style="margin-top:0.5rem">
+        <div class="range-labels"><span>رایگان</span><span>۲۰ میلیارد+</span></div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-section-title">محدوده متراژ</div>
+        <div class="range-value" id="area-display" style="margin-bottom:0.5rem">همه متراژها</div>
+        <input type="range" id="slider-min-area" min="0" max="2000" step="10" value="0">
+        <input type="range" id="slider-max-area" min="0" max="2000" step="10" value="2000" style="margin-top:0.5rem">
+        <div class="range-labels"><span>۰ م²</span><span>۲۰۰۰+ م²</span></div>
+      </div>
+
+      <div class="filter-section">
+        <button class="btn btn-primary btn-block" onclick="applyFilters()">🔍 اعمال فیلتر</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem">
+        <div id="results-count" style="font-size:0.9rem;color:var(--text-muted);font-weight:500"></div>
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <select class="form-control" id="sort-order" style="width:auto;font-size:0.85rem" onchange="applyFilters()">
+            <option value="newest">🕐 جدیدترین</option>
+            <option value="oldest">قدیمی‌ترین</option>
+            <option value="price_asc">💰 ارزان‌ترین</option>
+            <option value="price_desc">💎 گران‌ترین</option>
+          </select>
+          <div class="view-toggle">
+            <button class="view-btn active" id="grid-btn" onclick="setView('grid')" title="شبکه">⊞</button>
+            <button class="view-btn" id="list-btn" onclick="setView('list')" title="لیست">☰</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="active-filters" id="active-filters" style="display:none;margin-bottom:1rem"></div>
+
+      <div id="results-container"></div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+</div>
+
+<footer style="background:#0A0F18;color:rgba(255,255,255,0.65);padding:3rem 0 0;margin-top:3rem">
+  <div style="max-width:1200px;margin:0 auto;padding:0 1.25rem">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2.5rem;margin-bottom:2.5rem;flex-wrap:wrap">
+      <div>
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem">
+          <div style="width:42px;height:42px;background:#1B4F72;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem">🏠</div>
+          <span style="color:white;font-size:1.1rem;font-weight:800">املاک میرحاج</span>
+        </div>
+        <p style="font-size:0.85rem;line-height:1.9;margin-bottom:1rem">سامانه تخصصی معاملات ملکی منطقه جرقویه اصفهان. خرید، فروش، رهن و اجاره انواع ملک با مشاوره حرفه‌ای.</p>
+      </div>
+      <div>
+        <h4 style="color:white;margin-bottom:1rem;font-size:0.95rem;font-weight:700">دسترسی سریع</h4>
+        <a href="/pages/index.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">صفحه اصلی</a>
+        <a href="/pages/properties.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">همه آگهی‌ها</a>
+        <a href="/pages/create-listing.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">ثبت آگهی رایگان</a>
+        <a href="/pages/ai-assistant.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">دستیار هوشمند</a>
+        <a href="/pages/map-view.html" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">نقشه آگهی‌ها</a>
+      </div>
+      <div>
+        <h4 style="color:white;margin-bottom:1rem;font-size:0.95rem;font-weight:700">دسته‌بندی</h4>
+        <a href="/pages/properties.html?type=apartment" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">آپارتمان</a>
+        <a href="/pages/properties.html?type=villa" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">ویلا</a>
+        <a href="/pages/properties.html?type=land" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">زمین</a>
+        <a href="/pages/properties.html?type=garden" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">باغ</a>
+        <a href="/pages/properties.html?type=commercial" style="color:rgba(255,255,255,0.5);font-size:0.84rem;display:block;margin-bottom:0.5rem">تجاری</a>
+      </div>
+      <div>
+        <h4 style="color:white;margin-bottom:1rem;font-size:0.95rem;font-weight:700">تماس با ما</h4>
+        <p style="font-size:0.85rem;line-height:2.2">
+          📞 <strong style="color:white">09132089979</strong><br>
+          📍 محمدآباد جرقویه<br>
+          اصفهان، ایران<br>
+          🕐 همه روزه ۱۰ تا ۲۱
+        </p>
+        <a href="tel:09132089979" style="display:inline-flex;align-items:center;gap:0.5rem;background:#27AE60;color:white;padding:0.5rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:600;margin-top:0.75rem;text-decoration:none">📞 تماس مستقیم</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.07);padding:1.25rem 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+      <span style="font-size:0.8rem">© ۱۴۰۵ تمامی حقوق برای <strong style="color:white">املاک میرحاج</strong> محفوظ است</span>
+      <span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">طراحی و توسعه با ❤️</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script>
+<script>
+  let currentPage = 1, currentFilters = {}, selectedTypes = [], currentView = 'grid', selectedRooms = '';
+
+  function setView(v) {
+    currentView = v;
+    document.getElementById('grid-btn').classList.toggle('active', v==='grid');
+    document.getElementById('list-btn').classList.toggle('active', v==='list');
+    loadProperties(currentPage);
+  }
+
+  function setRooms(val, btn) {
+    document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedRooms = val;
+    applyFilters();
+  }
+
+  async function loadProperties(page=1) {
+    currentPage = page;
+    const container = document.getElementById('results-container');
+    container.innerHTML = `<div class="${currentView==='grid'?'property-grid':''}" style="${currentView==='list'?'display:flex;flex-direction:column;gap:0.75rem':''}">${buildSkeletonCards(6)}</div>`;
+
+    const params = new URLSearchParams({page, limit:12, ...currentFilters});
+    const {data} = await apiFetch('/properties?' + params.toString());
+
+    if (!data.success) { container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>خطا در بارگذاری</h3></div>`; return; }
+
+    document.getElementById('results-count').textContent = `${data.pagination.total.toLocaleString('fa-IR')} آگهی یافت شد`;
+
+    if (!data.properties.length) {
+      container.innerHTML = `<div class="empty-state">
+        <div class="empty-icon">🏠</div><h3>آگهی‌ای یافت نشد</h3>
+        <p>فیلترهای دیگری امتحان کنید</p>
+        <button class="btn btn-outline mt-2" onclick="clearFilters()">پاک کردن فیلترها</button>
+      </div>`;
+    } else if (currentView === 'grid') {
+      container.innerHTML = `<div class="property-grid">${data.properties.map(buildPropertyCard).join('')}</div>`;
+    } else {
+      container.innerHTML = `<div style="display:flex;flex-direction:column;gap:0.75rem">` +
+        data.properties.map(p => `
+          <div class="list-card" onclick="location.href='/pages/property-detail.html?id=${p.id}'">
+            <div class="list-card-img">
+              ${p.primary_image ? `<img src="/${p.primary_image}" alt="${p.title}" loading="lazy">` : '<div style="width:220px;height:100%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:3rem">🏠</div>'}
+              <span class="property-badge" style="position:absolute;top:0.6rem;right:0.6rem">${propertyTypeLabel(p.property_type)}</span>
+            </div>
+            <div class="list-card-body">
+              <div>
+                <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;line-height:1.4">${p.title}</h3>
+                <div style="font-size:0.84rem;color:var(--text-muted);margin-bottom:0.75rem">📍 ${p.location_name||'---'}</div>
+                <div style="display:flex;gap:1rem;flex-wrap:wrap">
+                  ${p.rooms?`<span style="font-size:0.82rem;color:var(--text-secondary)">🛏️ ${p.rooms} اتاق</span>`:''}
+                  ${p.area?`<span style="font-size:0.82rem;color:var(--text-secondary)">📐 ${p.area} م²</span>`:''}
+                  ${p.building_age?`<span style="font-size:0.82rem;color:var(--text-secondary)">🏗️ ${p.building_age} سال</span>`:''}
+                  ${p.parking?`<span style="font-size:0.82rem;color:var(--success)">🚗 پارکینگ</span>`:''}
+                  ${p.elevator?`<span style="font-size:0.82rem;color:var(--success)">🛗 آسانسور</span>`:''}
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1rem;flex-wrap:wrap;gap:0.5rem">
+                <div style="font-size:1.1rem;font-weight:800;color:var(--primary)">${formatPrice(p.total_price)}</div>
+                <div style="display:flex;gap:0.5rem">
+                  <button onclick="event.stopPropagation();addToCompare(${p.id})" class="btn btn-ghost btn-sm" title="افزودن به مقایسه">🔄</button>
+                  <a href="/pages/property-detail.html?id=${p.id}" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">مشاهده ›</a>
+                </div>
+              </div>
+            </div>
+          </div>`).join('') + '</div>';
+    }
+
+    buildPagination(document.getElementById('pagination'), data.pagination, loadProperties.toString());
+    renderActiveFilters('active-filters', currentFilters, removeFilter);
+  }
+
+  function removeFilter(key) {
+    delete currentFilters[key];
+    if (key==='property_type') {
+      selectedTypes=[];
+      document.querySelectorAll('#type-tags .tag-filter').forEach(t=>t.classList.remove('active'));
+      document.querySelector('#type-tags .tag-filter[data-value=""]').classList.add('active');
+    }
+    loadProperties(1);
+  }
+
+  function applyFilters() {
+    currentFilters={};
+    const search = document.getElementById('filter-search').value.trim();
+    const loc    = document.getElementById('filter-location').value;
+    const minP   = parseInt(document.getElementById('slider-min-price').value);
+    const maxP   = parseInt(document.getElementById('slider-max-price').value);
+    const minA   = parseInt(document.getElementById('slider-min-area').value);
+    const maxA   = parseInt(document.getElementById('slider-max-area').value);
+    if (selectedTypes.length) currentFilters.property_type = selectedTypes[selectedTypes.length-1];
+    if (search) currentFilters.search = search;
+    if (loc)    currentFilters.location_id = loc;
+    if (selectedRooms) currentFilters.rooms = selectedRooms;
+    if (minP>0) currentFilters.min_price = minP;
+    if (maxP<20000000000) currentFilters.max_price = maxP;
+    if (minA>0) currentFilters.min_area = minA;
+    if (maxA<2000) currentFilters.max_area = maxA;
+    loadProperties(1);
+  }
+
+  function clearFilters() {
+    document.getElementById('filter-search').value='';
+    document.getElementById('filter-location').value='';
+    document.getElementById('slider-min-price').value=0;
+    document.getElementById('slider-max-price').value=20000000000;
+    document.getElementById('slider-min-area').value=0;
+    document.getElementById('slider-max-area').value=2000;
+    document.querySelectorAll('#type-tags .tag-filter').forEach(t=>t.classList.remove('active'));
+    document.querySelector('#type-tags .tag-filter[data-value=""]').classList.add('active');
+    document.querySelectorAll('.room-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelector('.room-btn:first-child').classList.add('active');
+    selectedTypes=[];selectedRooms='';currentFilters={};
+    document.getElementById('price-display').textContent='همه قیمت‌ها';
+    document.getElementById('area-display').textContent='همه متراژها';
+    loadProperties(1);
+  }
+
+  function addToCompare(id) {
+    let list=JSON.parse(localStorage.getItem('mirhaj_compare')||'[]');
+    if(list.includes(id)){showToast('قبلاً اضافه شده','info');return;}
+    if(list.length>=3){showToast('حداکثر ۳ ملک قابل مقایسه است','warning');return;}
+    list.push(id);localStorage.setItem('mirhaj_compare',JSON.stringify(list));
+    showToast('به مقایسه اضافه شد ✅','success');
+  }
+
+  async function initPage() {
+    await loadLocations(document.getElementById('filter-location'));
+    initPriceSlider('slider-min-price','slider-max-price','price-display');
+    initAreaSlider('slider-min-area','slider-max-area','area-display');
+    ['slider-min-price','slider-max-price','slider-min-area','slider-max-area'].forEach(id=>{
+      document.getElementById(id).addEventListener('change', applyFilters);
+    });
+    initLiveSearch('filter-search','search-suggestions');
+    initTagFilters('type-tags', types=>{selectedTypes=types;applyFilters();});
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('type')) {
+      const tag = document.querySelector(`#type-tags .tag-filter[data-value="${params.get('type')}"]`);
+      if (tag) {
+        document.querySelector('#type-tags .tag-filter[data-value=""]').classList.remove('active');
+        tag.classList.add('active');
+        selectedTypes=[params.get('type')];
+        currentFilters.property_type=params.get('type');
+      }
+    }
+    if (params.get('search')) { document.getElementById('filter-search').value=params.get('search'); currentFilters.search=params.get('search'); }
+    if (params.get('location_id')) { document.getElementById('filter-location').value=params.get('location_id'); currentFilters.location_id=params.get('location_id'); }
+    loadProperties(1);
+  }
+
+  initPage();
+</script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

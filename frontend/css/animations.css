@@ -1,0 +1,377 @@
+/* ========================================
+   املاک میرحاج - انیمیشن‌ها و افکت‌ها
+======================================== */
+
+/* ---- Skeleton Loading ---- */
+.skeleton {
+  background: linear-gradient(90deg, #f0f4f8 25%, #e8eef4 50%, #f0f4f8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.skeleton-img   { height: 200px; }
+.skeleton-line  { height: 14px; margin: 8px 12px; }
+.skeleton-line.short { width: 60%; }
+.skeleton-line.price { height: 18px; width: 50%; margin-top: 12px; }
+
+/* ---- Page Fade In ---- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-up  { animation: fadeInUp 0.45s ease forwards; }
+.animate-fade     { animation: fadeIn 0.3s ease forwards; }
+.animate-scale-in { animation: scaleIn 0.3s ease forwards; }
+
+/* Staggered cards */
+.property-grid .property-card:nth-child(1)  { animation: fadeInUp 0.4s ease 0.05s both; }
+.property-grid .property-card:nth-child(2)  { animation: fadeInUp 0.4s ease 0.10s both; }
+.property-grid .property-card:nth-child(3)  { animation: fadeInUp 0.4s ease 0.15s both; }
+.property-grid .property-card:nth-child(4)  { animation: fadeInUp 0.4s ease 0.20s both; }
+.property-grid .property-card:nth-child(5)  { animation: fadeInUp 0.4s ease 0.25s both; }
+.property-grid .property-card:nth-child(6)  { animation: fadeInUp 0.4s ease 0.30s both; }
+.property-grid .property-card:nth-child(n+7){ animation: fadeInUp 0.4s ease 0.35s both; }
+
+/* ---- Enhanced Property Card ---- */
+.property-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  will-change: transform;
+}
+.property-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 12px 40px rgba(27,79,114,0.15);
+  border-color: var(--primary-light);
+}
+.property-card:active { transform: translateY(-2px) scale(1.005); }
+
+/* ---- Price Tag Pulse ---- */
+.property-card-price {
+  transition: color 0.2s;
+}
+.property-card:hover .property-card-price {
+  color: var(--accent);
+}
+
+/* ---- Button Ripple ---- */
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.2);
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: inherit;
+}
+.btn:active::after { opacity: 1; }
+
+/* ---- Navbar Scroll Effect ---- */
+.navbar.scrolled {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(10px);
+}
+
+/* ---- Hero Floating Animation ---- */
+.hero-icon {
+  animation: float 3s ease-in-out infinite;
+  display: inline-block;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* ---- Range Slider ---- */
+.range-group {
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+}
+.range-value {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-align: center;
+  margin-top: 0.25rem;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(27,79,114,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 3px 10px rgba(27,79,114,0.4);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(27,79,114,0.3);
+}
+
+/* ---- Live Search Box ---- */
+.search-wrapper {
+  position: relative;
+}
+.search-wrapper .search-icon {
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  font-size: 1rem;
+}
+.search-wrapper input {
+  padding-right: 2.4rem;
+}
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0; left: 0;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  z-index: 500;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.search-suggestion-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--border);
+}
+.search-suggestion-item:last-child { border-bottom: none; }
+.search-suggestion-item:hover { background: var(--bg); }
+.search-suggestion-item .sug-price {
+  margin-right: auto;
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 0.82rem;
+}
+
+/* ---- Filter Drawer (Mobile) ---- */
+.filter-drawer-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1500;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.filter-drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+.filter-drawer {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 300px;
+  background: white;
+  z-index: 1600;
+  padding: 1.5rem;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-lg);
+}
+.filter-drawer.open { transform: translateX(0); }
+
+/* ---- Tag Filters ---- */
+.tag-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.tag-filter {
+  padding: 0.35rem 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  background: white;
+  color: var(--text-secondary);
+}
+.tag-filter:hover { border-color: var(--primary); color: var(--primary); }
+.tag-filter.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+/* ---- Stats Counter Animation ---- */
+.counter { transition: all 0.3s; }
+
+/* ---- Card Hover Glow ---- */
+.card-glow:hover {
+  box-shadow: 0 0 0 3px rgba(46,134,193,0.15), var(--shadow-lg);
+}
+
+/* ---- Image Zoom Overlay ---- */
+.img-zoom-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  animation: fadeIn 0.2s ease;
+}
+.img-zoom-overlay img {
+  max-width: 92vw;
+  max-height: 92vh;
+  object-fit: contain;
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: scaleIn 0.2s ease;
+}
+.img-zoom-close {
+  position: absolute;
+  top: 1.5rem; left: 1.5rem;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.img-zoom-close:hover { background: rgba(255,255,255,0.25); }
+
+/* ---- Scroll to Top ---- */
+.scroll-top {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  width: 42px; height: 42px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.scroll-top.visible { opacity: 1; pointer-events: all; }
+.scroll-top:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+/* ---- Active Filter Badge ---- */
+.active-filters {
+  display: flex; gap: 0.4rem; flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+.active-filter-tag {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: #D6EAF8;
+  color: var(--primary);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.active-filter-tag button {
+  background: none; border: none;
+  color: var(--primary); font-size: 0.9rem;
+  cursor: pointer; padding: 0; line-height: 1;
+}
+
+/* ---- Dark Mode Toggle ---- */
+body.dark-mode {
+  --bg: #0f1923;
+  --bg-white: #1a2535;
+  --bg-card: #1a2535;
+  --bg-dark: #0a0f18;
+  --text-primary: #e8eef4;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #2a3a4f;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+  --shadow: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+}
+body.dark-mode .navbar { background: var(--bg-white); border-color: var(--border); }
+body.dark-mode .card { background: var(--bg-card); border-color: var(--border); }
+body.dark-mode .form-control { background: var(--bg); border-color: var(--border); color: var(--text-primary); }
+body.dark-mode thead { background: #0f1923; }
+body.dark-mode tbody tr:hover { background: #1f2f40; }
+body.dark-mode .filter-bar { background: var(--bg-card); border-color: var(--border); }
+body.dark-mode .stats-strip { background: var(--bg-card); border-color: var(--border); }
+body.dark-mode .tag-filter { background: var(--bg-card); border-color: var(--border); color: var(--text-secondary); }
+body.dark-mode .tag-filter.active { background: var(--primary); color: white; }
+
+.dark-toggle {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: var(--transition);
+  color: var(--text-secondary);
+}
+.dark-toggle:hover { background: var(--bg); }

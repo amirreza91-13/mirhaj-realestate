@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /pages/
+Allow: /css/
+Allow: /js/
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /pages/dashboard-
+Disallow: /pages/admin
+
+Sitemap: http://localhost:3000/sitemap.xml

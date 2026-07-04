@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>پیام‌ها - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <style>
+    .messages-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 0;
+      height: calc(100vh - 68px);
+      overflow: hidden;
+    }
+    /* Contacts sidebar */
+    .contacts-panel {
+      background: white;
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .contacts-header {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      background: white;
+      position: sticky;
+      top: 0;
+    }
+    .contacts-list { overflow-y: auto; flex: 1; }
+    .contact-item {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .contact-item:hover { background: var(--bg); }
+    .contact-item.active { background: #EBF5FB; border-right: 3px solid var(--primary); }
+    .contact-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      color: white;
+    }
+    .contact-info { flex: 1; min-width: 0; }
+    .contact-name { font-weight: 700; font-size: 0.88rem; }
+    .contact-last-msg {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 0.15rem;
+    }
+    .contact-unread {
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Chat panel */
+    .chat-panel {
+      display: flex;
+      flex-direction: column;
+      background: #f0f4f8;
+      overflow: hidden;
+    }
+    .chat-header {
+      background: white;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .chat-empty {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+      color: var(--text-muted);
+    }
+    .msg-bubble {
+      max-width: 72%;
+      animation: fadeInUp 0.2s ease;
+    }
+    .msg-bubble.sent { align-self: flex-start; }
+    .msg-bubble.received { align-self: flex-end; }
+    .msg-content {
+      padding: 0.65rem 1rem;
+      border-radius: 16px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      position: relative;
+    }
+    .msg-bubble.sent .msg-content {
+      background: white;
+      border: 1px solid var(--border);
+      border-top-right-radius: 4px;
+      color: var(--text-primary);
+    }
+    .msg-bubble.received .msg-content {
+      background: var(--primary);
+      color: white;
+      border-top-left-radius: 4px;
+    }
+    .msg-meta {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .msg-bubble.received .msg-meta { justify-content: flex-end; }
+    .msg-property-tag {
+      font-size: 0.72rem;
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+      padding: 0.15rem 0.4rem;
+      margin-bottom: 0.3rem;
+      display: inline-block;
+    }
+    .msg-bubble.sent .msg-property-tag {
+      background: var(--bg);
+      color: var(--primary);
+    }
+
+    /* Input area */
+    .chat-input-area {
+      background: white;
+      border-top: 1px solid var(--border);
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+    .chat-input-area textarea {
+      flex: 1;
+      resize: none;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.65rem 1rem;
+      font-family: var(--font);
+      font-size: 0.9rem;
+      direction: rtl;
+      min-height: 44px;
+      max-height: 120px;
+      transition: border-color 0.2s;
+    }
+    .chat-input-area textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(46,134,193,0.1);
+    }
+    .send-btn {
+      width: 44px; height: 44px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: var(--transition);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .send-btn:hover { background: var(--primary-dark); transform: scale(1.08); }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* New message modal */
+    .agents-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .agent-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+    }
+    .agent-card:hover { border-color: var(--primary); background: #EBF5FB; }
+    .agent-card.selected { border-color: var(--primary); background: #EBF5FB; }
+
+    /* Unread badge on navbar */
+    .nav-msg-badge {
+      background: var(--danger);
+      color: white;
+      border-radius: 50%;
+      width: 16px; height: 16px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: -4px;
+      left: -4px;
+    }
+
+    @media (max-width: 768px) {
+      .messages-layout { grid-template-columns: 1fr; }
+      .contacts-panel { display: none; height: 100%; }
+      .contacts-panel.mobile-show { display: flex; }
+      .chat-panel { display: none; }
+      .chat-panel.mobile-show { display: flex; }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1B4F72">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="میرحاج">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <div class="brand-icon">🏠</div><span>املاک میرحاج</span>
+    </a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+      <li><a href="/pages/messages.html">💬 پیام‌ها</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth">
+        <a href="/pages/login.html" class="btn btn-outline btn-sm">ورود</a>
+      </div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.3rem 0.75rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:110%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="/pages/profile.html" style="display:block;padding:0.6rem 1rem;font-size:0.88rem">👤 پروفایل</a>
+            <a href="#" onclick="logout()" style="display:block;padding:0.6rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="messages-layout">
+
+  <!-- Contacts Panel -->
+  <div class="contacts-panel" id="contacts-panel">
+    <div class="contacts-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+        <h3 style="font-size:1rem">💬 پیام‌ها</h3>
+        <button class="btn btn-primary btn-sm" onclick="openModal('new-msg-modal')">✏️ جدید</button>
+      </div>
+      <input type="text" class="form-control" placeholder="جستجوی مخاطب..." id="contact-search" oninput="filterContacts(this.value)">
+    </div>
+    <div class="contacts-list" id="contacts-list">
+      <div class="loading-overlay"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Chat Panel -->
+  <div class="chat-panel" id="chat-panel">
+    <div class="chat-empty" id="chat-empty">
+      <div style="font-size:4rem">💬</div>
+      <h3>یک مکالمه انتخاب کنید</h3>
+      <p style="font-size:0.9rem">یا پیام جدیدی شروع کنید</p>
+      <button class="btn btn-primary" onclick="openModal('new-msg-modal')">✏️ پیام جدید</button>
+    </div>
+
+    <div id="chat-active" style="display:none;flex-direction:column;height:100%">
+      <!-- Chat Header -->
+      <div class="chat-header">
+        <button class="btn btn-ghost btn-sm" id="back-btn" onclick="backToContacts()" style="display:none">←</button>
+        <div class="contact-avatar" id="chat-avatar">👤</div>
+        <div>
+          <div style="font-weight:700;font-size:0.95rem" id="chat-name"></div>
+          <div style="font-size:0.75rem;color:var(--text-muted)" id="chat-role"></div>
+        </div>
+        <div style="margin-right:auto">
+          <button class="btn btn-ghost btn-sm" onclick="openNewMsgToCurrentUser()">📨 پیام جدید</button>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="chat-messages" id="chat-messages"></div>
+
+      <!-- Input -->
+      <div class="chat-input-area">
+        <textarea id="msg-input" placeholder="پیام خود را بنویسید..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+          oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Message Modal -->
+<div class="modal-overlay" id="new-msg-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h3>✏️ پیام جدید</h3>
+      <button class="modal-close" onclick="closeModal('new-msg-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="new-msg-alert"></div>
+
+      <div class="form-group">
+        <label class="form-label">انتخاب گیرنده <span class="required">*</span></label>
+        <div class="agents-grid" id="agents-grid">
+          <div class="loading-overlay"><div class="spinner"></div></div>
+        </div>
+        <input type="hidden" id="selected-receiver" value="">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">درباره آگهی (اختیاری)</label>
+        <input type="text" class="form-control" id="msg-property-id" placeholder="شناسه آگهی مثلاً: 1">
+        <div class="form-hint">اگر درباره آگهی خاصی پیام می‌فرستید شناسه آن را وارد کنید</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">موضوع</label>
+        <input type="text" class="form-control" id="msg-subject" placeholder="موضوع پیام (اختیاری)">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">متن پیام <span class="required">*</span></label>
+        <textarea class="form-control" id="msg-body" rows="4" placeholder="پیام خود را بنویسید..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('new-msg-modal')">انصراف</button>
+      <button class="btn btn-primary" id="send-new-btn" onclick="sendNewMessage()">📨 ارسال پیام</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script>
+<script>
+  if (!requireAuth()) {}
+
+  const myUser = getUser();
+  let currentContactId = null;
+  let allContacts = [];
+  let pollInterval = null;
+
+  const ROLE_LABELS = { manager: 'مدیر کل', agent: 'مشاور', user: 'کاربر' };
+
+  function avatarEmoji(n) {
+    const avs = ['🏠','🏡','🏢','🏗️','🔑'];
+    return avs[(parseInt(n)||1)-1] || avs[0];
+  }
+
+  function formatDate(d) {
+    if (!d) return '';
+    const date = new Date(d);
+    const now = new Date();
+    const diff = now - date;
+    if (diff < 60000) return 'همین الان';
+    if (diff < 3600000) return `${Math.floor(diff/60000)} دقیقه پیش`;
+    if (diff < 86400000) return `${Math.floor(diff/3600000)} ساعت پیش`;
+    return date.toLocaleDateString('fa-IR');
+  }
+
+  // ---- Load Contacts ----
+  async function loadContacts() {
+    const { data } = await apiFetch('/messages/contacts');
+    const list = document.getElementById('contacts-list');
+
+    if (!data.success || data.contacts.length === 0) {
+      list.innerHTML = `<div class="empty-state" style="padding:2rem">
+        <div class="empty-icon">💬</div>
+        <h3 style="font-size:1rem">هنوز پیامی ندارید</h3>
+        <button class="btn btn-primary btn-sm mt-2" onclick="openModal('new-msg-modal')">شروع مکالمه</button>
+      </div>`;
+      return;
+    }
+
+    allContacts = data.contacts;
+    renderContacts(data.contacts);
+  }
+
+  function renderContacts(contacts) {
+    const list = document.getElementById('contacts-list');
+    list.innerHTML = contacts.map(c => `
+      <div class="contact-item ${currentContactId === c.user_id ? 'active' : ''}"
+           onclick="openChat(${c.user_id},'${c.full_name}',${c.avatar},'${c.role}')"
+           id="contact-${c.user_id}">
+        <div class="contact-avatar">${avatarEmoji(c.avatar)}</div>
+        <div class="contact-info">
+          <div class="contact-name">${c.full_name}
+            <span class="badge badge-secondary" style="font-size:0.65rem;margin-right:0.3rem">${ROLE_LABELS[c.role]||c.role}</span>
+          </div>
+          <div class="contact-last-msg">${c.last_message || '---'}</div>
+          <div style="font-size:0.68rem;color:var(--text-muted);margin-top:0.1rem">${formatDate(c.last_message_time)}</div>
+        </div>
+        ${c.unread_count > 0 ? `<div class="contact-unread">${c.unread_count}</div>` : ''}
+      </div>`).join('');
+  }
+
+  function filterContacts(search) {
+    if (!search) { renderContacts(allContacts); return; }
+    renderContacts(allContacts.filter(c =>
+      c.full_name.includes(search) || (c.last_message||'').includes(search)
+    ));
+  }
+
+  // ---- Open Chat ----
+  async function openChat(userId, name, avatar, role) {
+    currentContactId = userId;
+
+    // Update active state
+    document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
+    const contactEl = document.getElementById(`contact-${userId}`);
+    if (contactEl) contactEl.classList.add('active');
+
+    // Show chat panel
+    document.getElementById('chat-empty').style.display = 'none';
+    const chatActive = document.getElementById('chat-active');
+    chatActive.style.display = 'flex';
+
+    // Set header
+    document.getElementById('chat-avatar').textContent = avatarEmoji(avatar);
+    document.getElementById('chat-name').textContent = name;
+    document.getElementById('chat-role').textContent = ROLE_LABELS[role] || role;
+
+    // Load messages
+    await loadConversation(userId);
+
+    // Start polling
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(() => loadConversation(userId, true), 5000);
+
+    // Focus input
+    document.getElementById('msg-input').focus();
+  }
+
+  async function loadConversation(userId, silent = false) {
+    const { data } = await apiFetch(`/messages/conversation/${userId}`);
+    if (!data.success) return;
+
+    const container = document.getElementById('chat-messages');
+    const wasAtBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 50;
+
+    container.innerHTML = data.messages.length === 0
+      ? `<div style="text-align:center;color:var(--text-muted);padding:2rem;font-size:0.9rem">شروع مکالمه کنید 👋</div>`
+      : data.messages.map(m => {
+          const isSent = m.sender_id !== myUser.id;
+          return `
+            <div class="msg-bubble ${isSent ? 'sent' : 'received'}">
+              ${m.property_title ? `<div style="font-size:0.7rem;color:var(--primary);margin-bottom:0.25rem">🏠 درباره: ${m.property_title}</div>` : ''}
+              ${m.subject ? `<div style="font-size:0.72rem;font-weight:700;margin-bottom:0.25rem;color:${isSent?'var(--text-secondary)':'rgba(255,255,255,0.8)'}">${m.subject}</div>` : ''}
+              <div class="msg-content">${m.body.replace(/\n/g,'<br>')}</div>
+              <div class="msg-meta">
+                <span>${formatDate(m.created_at)}</span>
+                ${!isSent && m.is_read ? '<span>✓✓</span>' : !isSent ? '<span>✓</span>' : ''}
+              </div>
+            </div>`;
+        }).join('');
+
+    // Scroll to bottom
+    if (!silent || wasAtBottom) {
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // Update unread badge
+    loadContacts();
+  }
+
+  // ---- Send Message ----
+  async function sendMsg() {
+    const input = document.getElementById('msg-input');
+    const btn = document.getElementById('send-btn');
+    const body = input.value.trim();
+    if (!body || !currentContactId) return;
+
+    btn.disabled = true;
+    input.value = '';
+    input.style.height = 'auto';
+
+    const { ok, data } = await apiFetch('/messages', {
+      method: 'POST',
+      body: JSON.stringify({ receiver_id: currentContactId, body })
+    });
+
+    btn.disabled = false;
+
+    if (ok && data.success) {
+      await loadConversation(currentContactId);
+    } else {
+      showToast(data.message || 'خطا در ارسال', 'error');
+      input.value = body;
+    }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  // ---- Load Agents for New Message ----
+  async function loadAgents() {
+    const { data } = await apiFetch('/messages/agents');
+    const grid = document.getElementById('agents-grid');
+    if (!data.success || data.agents.length === 0) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:1rem">مشاوری یافت نشد</div>`;
+      return;
+    }
+    grid.innerHTML = data.agents.map(a => `
+      <div class="agent-card" data-id="${a.id}" onclick="selectAgent(${a.id}, this)">
+        <div style="font-size:2rem;margin-bottom:0.4rem">${avatarEmoji(a.avatar)}</div>
+        <div style="font-weight:700;font-size:0.88rem">${a.full_name}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">${ROLE_LABELS[a.role]||a.role}</div>
+        ${a.phone ? `<div style="font-size:0.72rem;color:var(--primary);margin-top:0.3rem">📞 ${a.phone}</div>` : ''}
+      </div>`).join('');
+  }
+
+  function selectAgent(id, el) {
+    document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('selected-receiver').value = id;
+  }
+
+  async function sendNewMessage() {
+    const alertEl = document.getElementById('new-msg-alert');
+    const btn = document.getElementById('send-new-btn');
+    alertEl.innerHTML = '';
+
+    const receiver_id = document.getElementById('selected-receiver').value;
+    const body = document.getElementById('msg-body').value.trim();
+    const subject = document.getElementById('msg-subject').value.trim();
+    const property_id = document.getElementById('msg-property-id').value.trim();
+
+    if (!receiver_id) { alertEl.innerHTML = `<div class="alert alert-warning">⚠️ لطفاً گیرنده را انتخاب کنید</div>`; return; }
+    if (!body) { alertEl.innerHTML = `<div class="alert alert-warning">⚠️ متن پیام الزامی است</div>`; return; }
+
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner spinner-sm"></div> ارسال...`;
+
+    const { ok, data } = await apiFetch('/messages', {
+      method: 'POST',
+      body: JSON.stringify({
+        receiver_id: parseInt(receiver_id),
+        body, subject: subject || null,
+        property_id: property_id ? parseInt(property_id) : null
+      })
+    });
+
+    btn.disabled = false;
+    btn.innerHTML = '📨 ارسال پیام';
+
+    if (ok && data.success) {
+      closeModal('new-msg-modal');
+      document.getElementById('msg-body').value = '';
+      document.getElementById('msg-subject').value = '';
+      document.getElementById('msg-property-id').value = '';
+      document.getElementById('selected-receiver').value = '';
+      document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('selected'));
+      showToast('پیام با موفقیت ارسال شد ✅', 'success');
+      await loadContacts();
+      // Open chat with the receiver
+      const agent = document.querySelector(`[data-id="${receiver_id}"]`);
+      if (agent) {
+        const name = agent.querySelector('div:nth-child(2)').textContent;
+        await openChat(parseInt(receiver_id), name, 1, 'agent');
+      }
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-danger">❌ ${data.message || 'خطا در ارسال'}</div>`;
+    }
+  }
+
+  function openNewMsgToCurrentUser() {
+    openModal('new-msg-modal');
+    if (currentContactId) {
+      const card = document.getElementById(`contact-${currentContactId}`);
+      if (card) {
+        const agentCard = document.querySelector(`[data-id="${currentContactId}"]`);
+        if (agentCard) selectAgent(currentContactId, agentCard);
+        else document.getElementById('selected-receiver').value = currentContactId;
+      }
+    }
+  }
+
+  function backToContacts() {
+    document.getElementById('chat-active').style.display = 'none';
+    document.getElementById('chat-empty').style.display = 'flex';
+    if (pollInterval) clearInterval(pollInterval);
+    currentContactId = null;
+  }
+
+  // Init
+  async function init() {
+    loadContacts();
+    loadAgents();
+
+    // Check if coming from property page
+    const params = new URLSearchParams(window.location.search);
+    const toUser = params.get('to');
+    const propId = params.get('property');
+    if (toUser && propId) {
+      document.getElementById('msg-property-id').value = propId;
+      document.getElementById('selected-receiver').value = toUser;
+      setTimeout(() => openModal('new-msg-modal'), 500);
+    }
+  }
+
+  init();
+</script>
+
+<script src="/js/pwa.js"></script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

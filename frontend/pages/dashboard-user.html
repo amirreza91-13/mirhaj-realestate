@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>داشبورد کاربر - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <div class="brand-icon">🏠</div><span>املاک میرحاج</span>
+    </a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+      <li><a href="/pages/create-listing.html">➕ ثبت آگهی</a></li>
+      <li><a href="/pages/map-view.html">🗺️ نقشه</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth">
+        <a href="/pages/login.html" class="btn btn-outline btn-sm">ورود</a>
+      </div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.3rem 0.75rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:110%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="/pages/profile.html" style="display:block;padding:0.6rem 1rem;font-size:0.88rem;color:var(--text-primary)">👤 پروفایل</a>
+            <a href="#" onclick="logout()" style="display:block;padding:0.6rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="padding:2rem 1.25rem 3rem">
+  <div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <div class="dashboard-sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebar-avatar">🏠</div>
+        <div style="font-weight:700;font-size:1rem" id="sidebar-name"></div>
+        <div style="font-size:0.8rem;opacity:0.75;margin-top:0.25rem" id="sidebar-role"></div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="active" onclick="showTab('my-listings');return false">🏠 آگهی‌های من</a>
+        <a href="/pages/create-listing.html">➕ ثبت آگهی جدید</a>
+        <a href="#" onclick="showTab('profile');return false">👤 ویرایش پروفایل</a>
+        <a href="#" onclick="logout()">🚪 خروج</a>
+      </nav>
+    </div>
+
+    <!-- Content -->
+    <div class="dashboard-content">
+
+      <!-- My Listings Tab -->
+      <div id="tab-my-listings">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+          <h2>🏠 آگهی‌های من</h2>
+          <a href="/pages/create-listing.html" class="btn btn-primary">➕ آگهی جدید</a>
+        </div>
+        <div id="my-listings-grid">
+          <div class="loading-overlay"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- Profile Tab -->
+      <div id="tab-profile" class="hidden">
+        <h2 style="margin-bottom:1.5rem">👤 ویرایش پروفایل</h2>
+        <div class="card">
+          <div class="card-body">
+            <div id="profile-alert"></div>
+
+            <div class="form-group">
+              <label class="form-label">آواتار</label>
+              <div class="avatar-grid">
+                <div class="avatar-option" data-avatar="1" onclick="selectAvatar(1)">🏠</div>
+                <div class="avatar-option" data-avatar="2" onclick="selectAvatar(2)">🏡</div>
+                <div class="avatar-option" data-avatar="3" onclick="selectAvatar(3)">🏢</div>
+                <div class="avatar-option" data-avatar="4" onclick="selectAvatar(4)">🏗️</div>
+                <div class="avatar-option" data-avatar="5" onclick="selectAvatar(5)">🔑</div>
+              </div>
+              <input type="hidden" id="avatar" value="1">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">نام کاربری</label>
+                <input type="text" class="form-control" id="p-username" disabled style="background:var(--bg)">
+              </div>
+              <div class="form-group">
+                <label class="form-label">نام کامل <span class="required">*</span></label>
+                <input type="text" class="form-control" id="p-fullname">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">شماره تماس</label>
+                <input type="tel" class="form-control" id="p-phone">
+              </div>
+              <div class="form-group">
+                <label class="form-label">ایمیل</label>
+                <input type="email" class="form-control" id="p-email">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">محل سکونت</label>
+              <input type="text" class="form-control" id="p-location">
+            </div>
+
+            <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:0.5rem">
+              <h4 style="margin-bottom:1rem">🔒 تغییر رمز عبور</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">رمز عبور فعلی</label>
+                  <input type="password" class="form-control" id="p-current-pw">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">رمز عبور جدید</label>
+                  <input type="password" class="form-control" id="p-new-pw">
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;margin-top:1rem">
+              <button class="btn btn-primary" id="save-profile-btn" onclick="saveProfile()">💾 ذخیره تغییرات</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom"><p>© ۱۴۰۵ تمامی حقوق برای املاک میرحاج محفوظ است</p></div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script>
+  if (!requireAuth()) {}
+
+  const user = getUser();
+
+  function showTab(tab) {
+    document.getElementById('tab-my-listings').classList.add('hidden');
+    document.getElementById('tab-profile').classList.add('hidden');
+    document.getElementById(`tab-${tab}`).classList.remove('hidden');
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  }
+
+  function selectAvatar(n) {
+    document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+    document.querySelector(`[data-avatar="${n}"]`).classList.add('selected');
+    document.getElementById('avatar').value = n;
+    document.getElementById('sidebar-avatar').textContent = avatarEmoji(n);
+  }
+
+  async function loadMyListings() {
+    const { data } = await apiFetch('/properties/my');
+    const grid = document.getElementById('my-listings-grid');
+
+    if (!data.success || data.properties.length === 0) {
+      grid.innerHTML = `<div class="empty-state">
+        <div class="empty-icon">🏠</div>
+        <h3>هنوز آگهی‌ای ثبت نکرده‌اید</h3>
+        <a href="/pages/create-listing.html" class="btn btn-primary">ثبت اولین آگهی</a>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem">` +
+      data.properties.map(p => `
+        <div class="card">
+          <div class="card-body" style="display:flex;gap:1rem;align-items:center">
+            <div style="width:80px;height:60px;border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.5rem">
+              ${p.primary_image ? `<img src="/${p.primary_image}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='🏠'">` : '🏠'}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;margin-bottom:0.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.title}</div>
+              <div style="font-size:0.82rem;color:var(--text-muted)">📍 ${p.location_name || '---'} | ${formatDate(p.created_at)}</div>
+              <div style="font-weight:700;color:var(--primary);font-size:0.95rem;margin-top:0.2rem">${formatPrice(p.total_price)}</div>
+            </div>
+            <div style="display:flex;gap:0.4rem;flex-shrink:0">
+              <span class="badge ${p.active ? 'badge-success' : 'badge-danger'}">${p.active ? 'فعال' : 'غیرفعال'}</span>
+              <a href="/pages/property-detail.html?id=${p.id}" class="btn btn-ghost btn-sm">👁️</a>
+              <a href="/pages/edit-listing.html?id=${p.id}" class="btn btn-outline btn-sm">✏️</a>
+              <button class="btn btn-danger btn-sm" onclick="deleteMyListing(${p.id}, this)">🗑️</button>
+            </div>
+          </div>
+        </div>`).join('') + `</div>`;
+  }
+
+  async function deleteMyListing(id, btn) {
+    confirmAction('آیا مطمئن هستید؟ این عملیات قابل بازگشت نیست.', async () => {
+      const { ok, data } = await apiFetch(`/properties/${id}`, { method: 'DELETE' });
+      if (ok && data.success) {
+        showToast('آگهی حذف شد', 'success');
+        loadMyListings();
+      } else showToast(data.message || 'خطا', 'error');
+    });
+  }
+
+  async function loadProfile() {
+    const { data } = await apiFetch('/auth/profile');
+    if (!data.success) return;
+    const u = data.user;
+
+    document.getElementById('p-username').value = u.username || '';
+    document.getElementById('p-fullname').value = u.full_name || '';
+    document.getElementById('p-phone').value = u.phone || '';
+    document.getElementById('p-email').value = u.email || '';
+    document.getElementById('p-location').value = u.location || '';
+    document.getElementById('avatar').value = u.avatar || 1;
+    selectAvatar(u.avatar || 1);
+
+    document.getElementById('sidebar-name').textContent = u.full_name;
+    document.getElementById('sidebar-role').textContent = roleLabel(u.role);
+    document.getElementById('sidebar-avatar').textContent = avatarEmoji(u.avatar);
+  }
+
+  async function saveProfile() {
+    const alertEl = document.getElementById('profile-alert');
+    const btn = document.getElementById('save-profile-btn');
+    alertEl.innerHTML = '';
+
+    const full_name = document.getElementById('p-fullname').value.trim();
+    if (!full_name) {
+      alertEl.innerHTML = `<div class="alert alert-warning">⚠️ نام کامل الزامی است</div>`;
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner spinner-sm"></div> در حال ذخیره...`;
+
+    const body = {
+      full_name,
+      phone: document.getElementById('p-phone').value.trim() || null,
+      email: document.getElementById('p-email').value.trim() || null,
+      location: document.getElementById('p-location').value.trim() || null,
+      avatar: parseInt(document.getElementById('avatar').value),
+      current_password: document.getElementById('p-current-pw').value || undefined,
+      new_password: document.getElementById('p-new-pw').value || undefined,
+    };
+
+    const { ok, data } = await apiFetch('/auth/profile', { method: 'PUT', body: JSON.stringify(body) });
+
+    btn.disabled = false;
+    btn.innerHTML = '💾 ذخیره تغییرات';
+
+    if (ok && data.success) {
+      setAuth(getToken(), data.user);
+      alertEl.innerHTML = `<div class="alert alert-success">✅ پروفایل با موفقیت ذخیره شد</div>`;
+      document.getElementById('p-current-pw').value = '';
+      document.getElementById('p-new-pw').value = '';
+      document.getElementById('sidebar-name').textContent = data.user.full_name;
+      document.getElementById('sidebar-avatar').textContent = avatarEmoji(data.user.avatar);
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-danger">❌ ${data.message || 'خطا در ذخیره'}</div>`;
+    }
+  }
+
+  // Init
+  loadProfile();
+  loadMyListings();
+</script>
+</body>
+</html>

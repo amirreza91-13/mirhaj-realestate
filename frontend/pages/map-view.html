@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نمای نقشه - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    #map { height: calc(100vh - 68px); width: 100%; z-index: 1; }
+    .map-sidebar {
+      position: fixed; top: 68px; right: 0;
+      width: 340px; height: calc(100vh - 68px);
+      background: white; border-left: 1px solid var(--border);
+      overflow-y: auto; z-index: 500;
+      display: flex; flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.08);
+    }
+    .map-sidebar-header {
+      padding: 1rem; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: white; z-index: 1;
+    }
+    .map-prop-card {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex; gap: 0.75rem; align-items: flex-start;
+    }
+    .map-prop-card:hover { background: var(--bg); }
+    .map-prop-card.active { background: #EBF5FB; border-right: 3px solid var(--primary); }
+    .map-prop-thumb {
+      width: 64px; height: 52px;
+      border-radius: var(--radius-sm);
+      overflow: hidden; flex-shrink: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
+    .map-prop-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .leaflet-popup-content-wrapper { border-radius: var(--radius) !important; }
+    .map-popup { font-family: 'Vazirmatn', sans-serif; direction: rtl; min-width: 200px; }
+    .map-popup h4 { font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--primary); }
+    .map-popup .price { font-weight: 800; color: var(--accent); font-size: 0.95rem; }
+    .map-popup a { display: block; margin-top: 0.6rem; color: var(--primary); font-size: 0.82rem; font-weight: 600; }
+    @media (max-width: 768px) {
+      .map-sidebar { width: 100%; top: auto; bottom: 0; height: 40vh; right: 0; left: 0; border-left: none; border-top: 1px solid var(--border); }
+      #map { height: 60vh; }
+    }
+  </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1B4F72">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="میرحاج">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <div class="brand-icon">🏠</div><span>املاک میرحاج</span>
+    </a>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">📋 لیست</a></li>
+      <li><a href="/pages/map-view.html">🗺️ نقشه</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth">
+        <a href="/pages/login.html" class="btn btn-outline btn-sm">ورود</a>
+      </div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.3rem 0.75rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:110%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="#" onclick="logout()" style="display:block;padding:0.6rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Map -->
+<div id="map"></div>
+
+<!-- Sidebar -->
+<div class="map-sidebar">
+  <div class="map-sidebar-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+      <h3 style="font-size:1rem">🗺️ آگهی‌ها روی نقشه</h3>
+      <span class="badge badge-primary" id="map-count">-</span>
+    </div>
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="form-control" id="map-search" placeholder="جستجو..." oninput="filterMapList(this.value)">
+    </div>
+    <select class="form-control mt-1" id="map-type-filter" onchange="filterMapList(document.getElementById('map-search').value)">
+      <option value="">همه انواع</option>
+      <option value="apartment">آپارتمان</option>
+      <option value="villa">ویلا</option>
+      <option value="land">زمین</option>
+      <option value="commercial">تجاری</option>
+      <option value="garden">باغ</option>
+      <option value="workshop">کارگاه</option>
+    </select>
+  </div>
+  <div id="map-list">
+    <div class="loading-overlay"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/animations.js"></script>
+<script>
+  // Jarqouyeh region center
+  const DEFAULT_LAT = 32.6;
+  const DEFAULT_LNG = 51.8;
+
+  let map, markers = [], allProperties = [];
+  let activeMarkerId = null;
+
+  function initMap() {
+    map = L.map('map', { zoomControl: false }).setView([DEFAULT_LAT, DEFAULT_LNG], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 18
+    }).addTo(map);
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+  }
+
+  function createMarkerIcon(type, isActive = false) {
+    const icons = { apartment:'🏢', villa:'🏡', land:'🌿', commercial:'🏪', garden:'🌳', workshop:'🔧', storage:'📦', other:'🏠' };
+    const emoji = icons[type] || '🏠';
+    const bg = isActive ? '#E67E22' : '#1B4F72';
+    return L.divIcon({
+      html: `<div style="background:${bg};color:white;border-radius:50% 50% 50% 0;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);transform:rotate(-45deg)"><span style="transform:rotate(45deg)">${emoji}</span></div>`,
+      className: '',
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -36]
+    });
+  }
+
+  function addMarkers(properties) {
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
+
+    const withCoords = properties.filter(p => p.map_lat && p.map_lng);
+    document.getElementById('map-count').textContent = withCoords.length;
+
+    withCoords.forEach(p => {
+      const marker = L.marker([p.map_lat, p.map_lng], { icon: createMarkerIcon(p.property_type) })
+        .addTo(map)
+        .bindPopup(`
+          <div class="map-popup">
+            <h4>${p.title}</h4>
+            <div>📍 ${p.location_name || '---'}</div>
+            <div>📐 ${p.area} م² | ${p.rooms ? `🛏️ ${p.rooms} اتاق` : ''}</div>
+            <div class="price">${formatPrice(p.total_price)}</div>
+            <a href="/pages/property-detail.html?id=${p.id}">مشاهده جزئیات ←</a>
+          </div>`, { maxWidth: 260 });
+
+      marker.on('click', () => highlightCard(p.id));
+      marker._propId = p.id;
+      markers.push(marker);
+    });
+
+    if (withCoords.length > 0) {
+      const group = L.featureGroup(markers);
+      map.fitBounds(group.getBounds().pad(0.15));
+    }
+  }
+
+  function renderList(properties) {
+    const list = document.getElementById('map-list');
+    const withCoords = properties.filter(p => p.map_lat && p.map_lng);
+    const withoutCoords = properties.filter(p => !p.map_lat || !p.map_lng);
+
+    if (properties.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">🗺️</div><h3>نتیجه‌ای یافت نشد</h3></div>`;
+      return;
+    }
+
+    const renderCard = (p) => `
+      <div class="map-prop-card" id="card-${p.id}" onclick="focusProperty(${p.id})">
+        <div class="map-prop-thumb">
+          ${p.primary_image ? `<img src="/${p.primary_image}" onerror="this.parentElement.innerHTML='🏠'">` : '🏠'}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:0.85rem;margin-bottom:0.2rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.title}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted)">📍 ${p.location_name || '---'}</div>
+          <div style="font-weight:700;color:var(--primary);font-size:0.82rem;margin-top:0.2rem">${formatPrice(p.total_price)}</div>
+          ${!p.map_lat ? '<div style="font-size:0.7rem;color:var(--warning);margin-top:0.2rem">⚠️ بدون مختصات</div>' : ''}
+        </div>
+      </div>`;
+
+    list.innerHTML = withCoords.map(renderCard).join('') +
+      (withoutCoords.length > 0 ? `
+        <div style="padding:0.75rem 1rem;background:var(--bg);font-size:0.8rem;color:var(--text-muted);font-weight:600;border-bottom:1px solid var(--border)">
+          ⚠️ ${withoutCoords.length} آگهی بدون موقعیت
+        </div>` + withoutCoords.map(renderCard).join('') : '');
+  }
+
+  function focusProperty(id) {
+    const prop = allProperties.find(p => p.id === id);
+    if (!prop) return;
+
+    // Highlight card
+    document.querySelectorAll('.map-prop-card').forEach(c => c.classList.remove('active'));
+    const card = document.getElementById(`card-${id}`);
+    if (card) { card.classList.add('active'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+
+    // Focus marker
+    if (prop.map_lat && prop.map_lng) {
+      map.setView([prop.map_lat, prop.map_lng], 15, { animate: true });
+      const marker = markers.find(m => m._propId === id);
+      if (marker) { marker.setIcon(createMarkerIcon(prop.property_type, true)); marker.openPopup(); }
+      if (activeMarkerId && activeMarkerId !== id) {
+        const prev = allProperties.find(p => p.id === activeMarkerId);
+        const prevMarker = markers.find(m => m._propId === activeMarkerId);
+        if (prev && prevMarker) prevMarker.setIcon(createMarkerIcon(prev.property_type, false));
+      }
+      activeMarkerId = id;
+    }
+  }
+
+  function highlightCard(id) {
+    document.querySelectorAll('.map-prop-card').forEach(c => c.classList.remove('active'));
+    const card = document.getElementById(`card-${id}`);
+    if (card) { card.classList.add('active'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  }
+
+  function filterMapList(search) {
+    const type = document.getElementById('map-type-filter').value;
+    const filtered = allProperties.filter(p => {
+      const matchSearch = !search || p.title.includes(search) || (p.location_name || '').includes(search);
+      const matchType = !type || p.property_type === type;
+      return matchSearch && matchType;
+    });
+    addMarkers(filtered);
+    renderList(filtered);
+  }
+
+  async function loadMapProperties() {
+    const { data } = await apiFetch('/properties?limit=200');
+    if (!data.success) return;
+    allProperties = data.properties;
+    addMarkers(allProperties);
+    renderList(allProperties);
+  }
+
+  // Init
+  initMap();
+  loadMapProperties();
+</script>
+
+<script src="/js/pwa.js"></script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

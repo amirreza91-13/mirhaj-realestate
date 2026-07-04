@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مقایسه ملک‌ها - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <style>
+    .compare-table { overflow-x: auto; }
+    .compare-table table { min-width: 600px; border-collapse: collapse; width: 100%; }
+    .compare-table th, .compare-table td { padding: 0.85rem 1rem; border: 1px solid var(--border); vertical-align: top; text-align: right; }
+    .compare-table th { background: var(--primary); color: white; font-weight: 700; font-size: 0.88rem; }
+    .compare-table .row-label { background: var(--bg); font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
+    .compare-table .best { background: #EAFAF1; color: var(--success); font-weight: 700; }
+    .compare-table .worst { background: #FDEDEC; }
+    .compare-img { width: 100%; height: 120px; object-fit: cover; border-radius: var(--radius-sm); }
+    .compare-remove { background: var(--danger); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 0.8rem; cursor: pointer; margin-right: 0.5rem; }
+    .add-compare-btn {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 2rem; text-align: center; cursor: pointer;
+      transition: var(--transition); color: var(--text-muted);
+      min-height: 200px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .add-compare-btn:hover { border-color: var(--primary); color: var(--primary); background: #EBF5FB; }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <img src="/assets/logo-small.svg" alt="املاک میرحاج" style="height:40px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="brand-icon" style="display:none">🏠</div>
+      <span>املاک میرحاج</span>
+    </a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+      <li><a href="/pages/compare.html">🔄 مقایسه</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth"><a href="/pages/login.html" class="btn btn-outline btn-sm">ورود</a></div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.3rem 0.75rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:110%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="#" onclick="logout()" style="display:block;padding:0.6rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>🔄 مقایسه ملک‌ها</h1>
+    <div class="breadcrumb"><a href="/pages/index.html">خانه</a><span>مقایسه</span></div>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:3rem">
+  <div class="alert alert-info mb-3">ℹ️ حداکثر ۳ ملک را می‌توانید با هم مقایسه کنید. از صفحه هر آگهی روی دکمه "افزودن به مقایسه" کلیک کنید.</div>
+
+  <!-- Property slots -->
+  <div id="compare-slots" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-bottom:2rem"></div>
+
+  <!-- Compare Table -->
+  <div id="compare-table-section" style="display:none">
+    <h3 style="margin-bottom:1rem">📊 جدول مقایسه</h3>
+    <div class="compare-table">
+      <table id="compare-table"></table>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom"><p>© ۱۴۰۵ تمامی حقوق برای املاک میرحاج محفوظ است</p></div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script>
+  // Compare list stored in localStorage
+  let compareList = JSON.parse(localStorage.getItem('mirhaj_compare') || '[]');
+  let compareProperties = [];
+
+  const ROWS = [
+    { key: 'property_type', label: 'نوع ملک', format: v => propertyTypeLabel(v) },
+    { key: 'deed_type', label: 'نوع سند', format: v => ({ single_page:'تک برگ', mangooledar:'منقوله‌دار', other:'سایر' }[v] || v) },
+    { key: 'location_name', label: 'منطقه', format: v => v || '---' },
+    { key: 'area', label: 'متراژ', format: v => v ? `${v} م²` : '---', compare: 'higher' },
+    { key: 'total_price', label: 'قیمت کل', format: v => formatPrice(v), compare: 'lower' },
+    { key: 'price_per_meter', label: 'قیمت هر متر', format: v => v ? formatPrice(v) : '---', compare: 'lower' },
+    { key: 'rooms', label: 'اتاق', format: v => v || '۰', compare: 'higher' },
+    { key: 'bathrooms', label: 'سرویس', format: v => v || '۰', compare: 'higher' },
+    { key: 'building_age', label: 'سن بنا', format: v => v ? `${v} سال` : '---', compare: 'lower' },
+    { key: 'floor', label: 'طبقه', format: v => v || '---' },
+    { key: 'parking', label: 'پارکینگ', format: v => v ? '✅ دارد' : '❌ ندارد' },
+    { key: 'storage', label: 'انباری', format: v => v ? '✅ دارد' : '❌ ندارد' },
+    { key: 'elevator', label: 'آسانسور', format: v => v ? '✅ دارد' : '❌ ندارد' },
+  ];
+
+  async function init() {
+    await loadCompareProperties();
+    renderSlots();
+    renderTable();
+  }
+
+  async function loadCompareProperties() {
+    compareProperties = [];
+    for (const id of compareList) {
+      const { data } = await apiFetch(`/properties/${id}`);
+      if (data.success) compareProperties.push(data.property);
+    }
+  }
+
+  function renderSlots() {
+    const container = document.getElementById('compare-slots');
+    const slots = [...compareProperties];
+
+    // Add empty slots up to 3
+    while (slots.length < 3) slots.push(null);
+
+    container.innerHTML = slots.map((p, i) => p ? `
+      <div class="card animate-fade-up">
+        <div style="height:120px;overflow:hidden;border-radius:var(--radius) var(--radius) 0 0">
+          ${p.images?.[0] ? `<img src="/${p.images[0].filepath}" class="compare-img">` : '<div style="height:120px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:2rem">🏠</div>'}
+        </div>
+        <div class="card-body" style="padding:0.85rem">
+          <div style="font-weight:700;font-size:0.9rem;margin-bottom:0.3rem">${p.title}</div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">📍 ${p.location_name || '---'}</div>
+          <div style="font-weight:800;color:var(--primary);margin-top:0.4rem">${formatPrice(p.total_price)}</div>
+          <div style="display:flex;gap:0.4rem;margin-top:0.75rem">
+            <a href="/pages/property-detail.html?id=${p.id}" class="btn btn-outline btn-sm" style="flex:1;text-align:center">مشاهده</a>
+            <button class="compare-remove" onclick="removeProp(${p.id})">✕</button>
+          </div>
+        </div>
+      </div>` : `
+      <div class="add-compare-btn" onclick="location.href='/pages/properties.html'">
+        <div style="font-size:2.5rem">➕</div>
+        <div style="font-weight:600">افزودن ملک</div>
+        <div style="font-size:0.8rem">از لیست آگهی‌ها انتخاب کنید</div>
+      </div>`).join('');
+  }
+
+  function renderTable() {
+    const section = document.getElementById('compare-table-section');
+    const table = document.getElementById('compare-table');
+
+    if (compareProperties.length < 2) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+
+    // Header row
+    let html = `<tr><th style="background:#0D1B2A">مشخصات</th>`;
+    compareProperties.forEach(p => {
+      html += `<th>${p.title}</th>`;
+    });
+    html += '</tr>';
+
+    // Data rows
+    ROWS.forEach(row => {
+      html += `<tr><td class="row-label">${row.label}</td>`;
+      const values = compareProperties.map(p => p[row.key]);
+
+      // Find best/worst for numeric comparisons
+      let bestIdx = -1, worstIdx = -1;
+      if (row.compare && values.every(v => v !== null && v !== undefined && !isNaN(v))) {
+        const nums = values.map(Number);
+        if (row.compare === 'higher') {
+          bestIdx = nums.indexOf(Math.max(...nums));
+          worstIdx = nums.indexOf(Math.min(...nums));
+        } else {
+          bestIdx = nums.indexOf(Math.min(...nums));
+          worstIdx = nums.indexOf(Math.max(...nums));
+        }
+      }
+
+      compareProperties.forEach((p, i) => {
+        const cls = i === bestIdx ? 'best' : i === worstIdx ? 'worst' : '';
+        html += `<td class="${cls}">${row.format(p[row.key])}</td>`;
+      });
+      html += '</tr>';
+    });
+
+    table.innerHTML = html;
+  }
+
+  function removeProp(id) {
+    compareList = compareList.filter(i => i !== id);
+    localStorage.setItem('mirhaj_compare', JSON.stringify(compareList));
+    compareProperties = compareProperties.filter(p => p.id !== id);
+    renderSlots();
+    renderTable();
+    showToast('از مقایسه حذف شد', 'info');
+  }
+
+  // Helper
+  function propertyTypeLabel(t) {
+    return { apartment:'آپارتمان', villa:'ویلا', land:'زمین', commercial:'تجاری', workshop:'کارگاه', storage:'انباری', garden:'باغ', other:'سایر' }[t] || t;
+  }
+
+  init();
+</script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

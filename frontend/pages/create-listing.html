@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ثبت آگهی - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <script src="/js/protect.js"></script>
+  <style>
+    .steps { display:flex; gap:0; margin-bottom:2rem; }
+    .step { flex:1; display:flex; flex-direction:column; align-items:center; gap:0.4rem; position:relative; }
+    .step::after { content:''; position:absolute; top:18px; left:-50%; width:100%; height:2px; background:var(--border); z-index:0; }
+    .step:first-child::after { display:none; }
+    .step-circle { width:36px; height:36px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:700; background:white; z-index:1; transition:var(--transition); }
+    .step.active .step-circle { background:var(--primary); border-color:var(--primary); color:white; }
+    .step.done .step-circle { background:var(--success); border-color:var(--success); color:white; }
+    .step.done::after, .step.active::after { background:var(--primary); }
+    .step-label { font-size:0.72rem; color:var(--text-muted); text-align:center; }
+    .step.active .step-label { color:var(--primary); font-weight:600; }
+
+    /* Image Upload */
+    .upload-zone {
+      border:2.5px dashed var(--border); border-radius:var(--radius-lg);
+      padding:2.5rem; text-align:center; cursor:pointer;
+      transition:all 0.25s ease; background:var(--bg);
+      position:relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color:var(--primary); background:#EBF5FB; transform:scale(1.01);
+    }
+    .upload-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+    .upload-icon { font-size:3rem; margin-bottom:0.75rem; }
+    .upload-title { font-weight:700; font-size:1rem; margin-bottom:0.4rem; }
+    .upload-sub { font-size:0.82rem; color:var(--text-muted); }
+
+    .img-preview-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; margin-top:1rem; }
+    .img-prev-wrap {
+      position:relative; border-radius:var(--radius); overflow:hidden;
+      aspect-ratio:4/3; border:2px solid var(--border);
+      background:var(--bg); cursor:pointer;
+    }
+    .img-prev-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
+    .img-prev-wrap.primary { border-color:var(--primary); }
+    .img-prev-wrap.primary::before { content:'📌 اصلی'; position:absolute; top:0.4rem; right:0.4rem; background:var(--primary); color:white; font-size:0.65rem; font-weight:700; padding:0.2rem 0.5rem; border-radius:20px; z-index:2; }
+    .img-prev-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.55); display:flex; align-items:center; justify-content:center; gap:0.5rem; opacity:0; transition:opacity 0.2s; }
+    .img-prev-wrap:hover .img-prev-overlay { opacity:1; }
+    .img-prev-btn { background:white; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
+    .img-prev-btn:hover { transform:scale(1.1); }
+    .img-count-badge { position:absolute; bottom:0.4rem; left:0.4rem; background:rgba(0,0,0,0.6); color:white; font-size:0.65rem; padding:0.15rem 0.5rem; border-radius:20px; }
+
+    .add-more-btn { border:2px dashed var(--border); border-radius:var(--radius); aspect-ratio:4/3; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:var(--transition); background:var(--bg); font-size:0.82rem; color:var(--text-muted); gap:0.4rem; position:relative; }
+    .add-more-btn:hover { border-color:var(--primary); color:var(--primary); background:#EBF5FB; }
+    .add-more-btn input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+
+    .upload-progress { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:0.5rem; display:none; }
+    .upload-progress-bar { height:100%; background:var(--primary); border-radius:2px; transition:width 0.3s; width:0%; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <img src="/assets/logo-small.svg" alt="املاک میرحاج" style="height:40px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="brand-icon" style="display:none">🏠</div>
+      <span>املاک میرحاج</span>
+    </a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth" style="display:flex;gap:0.4rem">
+        <a href="/pages/login.html" class="btn btn-ghost btn-sm">ورود</a>
+        <a href="/pages/register.html" class="btn btn-primary btn-sm">ثبت‌نام</a>
+      </div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.35rem 0.85rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:115%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="#" onclick="logout()" style="display:block;padding:0.65rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>➕ ثبت آگهی جدید</h1>
+    <div class="breadcrumb"><a href="/pages/index.html">خانه</a><span>ثبت آگهی</span></div>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:3rem;max-width:860px">
+
+  <!-- Steps -->
+  <div class="steps mb-4">
+    <div class="step active" id="s1"><div class="step-circle">۱</div><div class="step-label">اطلاعات اصلی</div></div>
+    <div class="step" id="s2"><div class="step-circle">۲</div><div class="step-label">قیمت و متراژ</div></div>
+    <div class="step" id="s3"><div class="step-circle">۳</div><div class="step-label">مشخصات</div></div>
+    <div class="step" id="s4"><div class="step-circle">۴</div><div class="step-label">تصاویر</div></div>
+  </div>
+
+  <div id="form-alert"></div>
+
+  <!-- Step 1: Basic Info -->
+  <div class="card mb-3" id="card1">
+    <div class="card-header" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white">
+      <b>📋 مرحله ۱ - اطلاعات اصلی</b>
+    </div>
+    <div class="card-body">
+      <div class="form-group">
+        <label class="form-label">عنوان آگهی <span class="required">*</span></label>
+        <input type="text" class="form-control" id="title" placeholder="مثال: آپارتمان ۸۵ متری نوساز در نصرآباد">
+        <div class="form-hint">عنوان جذاب = کلیک بیشتر! 💡</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">نوع ملک <span class="required">*</span></label>
+          <select class="form-control" id="property_type">
+            <option value="">انتخاب کنید</option>
+            <option value="apartment">🏢 آپارتمان</option>
+            <option value="villa">🏡 ویلا</option>
+            <option value="land">🌿 زمین</option>
+            <option value="commercial">🏪 تجاری</option>
+            <option value="workshop">🔧 کارگاه</option>
+            <option value="storage">📦 انباری</option>
+            <option value="garden">🌳 باغ</option>
+            <option value="other">🏠 سایر</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">نوع سند <span class="required">*</span></label>
+          <select class="form-control" id="deed_type">
+            <option value="">انتخاب کنید</option>
+            <option value="single_page">📄 تک برگ</option>
+            <option value="mangooledar">🔏 منگوله‌دار</option>
+            <option value="gholanome">📝 قولنامه</option>
+            <option value="mobayeeh">📋 مبایعه‌نامه</option>
+            <option value="sabz">🟢 سند سبز</option>
+            <option value="zard">🟡 سند زرد</option>
+            <option value="other">📃 سایر</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">منطقه / محله <span class="required">*</span></label>
+        <select class="form-control" id="location_id"></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Price & Area -->
+  <div class="card mb-3" id="card2">
+    <div class="card-header" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white">
+      <b>💰 مرحله ۲ - قیمت و متراژ</b>
+    </div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">متراژ (متر مربع) <span class="required">*</span></label>
+          <input type="number" class="form-control" id="area" placeholder="مثال: 85" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">قیمت کل (تومان) <span class="required">*</span></label>
+          <input type="number" class="form-control" id="total_price" placeholder="مثال: 2500000000" min="0" oninput="calcPPM()">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">قیمت هر متر (تومان)</label>
+        <input type="number" class="form-control" id="price_per_meter" placeholder="محاسبه خودکار ⚡">
+        <div class="form-hint">اگر خالی بگذارید خودکار محاسبه می‌شود</div>
+      </div>
+      <!-- Price Preview -->
+      <div id="price-preview" style="display:none;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;border-radius:var(--radius);padding:1rem;text-align:center;margin-top:0.5rem">
+        <div style="font-size:0.78rem;opacity:0.8">قیمت کل</div>
+        <div id="price-preview-val" style="font-size:1.5rem;font-weight:900"></div>
+        <div id="ppm-preview-val" style="font-size:0.78rem;opacity:0.8;margin-top:0.2rem"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Details -->
+  <div class="card mb-3" id="card3">
+    <div class="card-header" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white">
+      <b>🏠 مرحله ۳ - مشخصات ملک</b>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem">
+        <div class="form-group">
+          <label class="form-label">تعداد اتاق</label>
+          <input type="number" class="form-control" id="rooms" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">سرویس بهداشتی</label>
+          <input type="number" class="form-control" id="bathrooms" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">سن بنا (سال)</label>
+          <input type="number" class="form-control" id="building_age" placeholder="مثال: 5" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">طبقه</label>
+          <input type="number" class="form-control" id="floor" placeholder="مثال: 2" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">جهت ساختمان</label>
+          <select class="form-control" id="direction">
+            <option value="">انتخاب کنید</option>
+            <option value="شمالی">شمالی</option>
+            <option value="جنوبی">جنوبی</option>
+            <option value="شرقی">شرقی</option>
+            <option value="غربی">غربی</option>
+            <option value="شمال شرقی">شمال شرقی</option>
+            <option value="شمال غربی">شمال غربی</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:2rem;margin-top:0.5rem;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight:600">
+          <input type="checkbox" id="parking" style="width:18px;height:18px"> 🚗 پارکینگ دارد
+        </label>
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight:600">
+          <input type="checkbox" id="storage" style="width:18px;height:18px"> 📦 انباری دارد
+        </label>
+        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight:600">
+          <input type="checkbox" id="elevator" style="width:18px;height:18px"> 🛗 آسانسور دارد
+        </label>
+      </div>
+      <div class="form-group mt-3">
+        <label class="form-label">توضیحات ملک</label>
+        <textarea class="form-control" id="description" rows="5"
+          placeholder="توضیحات کامل درباره ملک، امکانات، موقعیت و هر اطلاعات مفید دیگری...&#10;&#10;💡 توضیحات بهتر = فروش سریع‌تر!"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Images - THE STAR ⭐ -->
+  <div class="card mb-3" id="card4">
+    <div class="card-header" style="background:linear-gradient(135deg,#E67E22,#F39C12);color:white">
+      <b>📸 مرحله ۴ - تصاویر ملک</b>
+      <span style="font-size:0.78rem;opacity:0.85;margin-right:0.5rem">(حداکثر ۳ تصویر - اولین تصویر اصلیه)</span>
+    </div>
+    <div class="card-body">
+
+      <!-- Main Upload Zone -->
+      <div id="upload-zone-wrap" class="upload-zone" id="upload-zone">
+        <input type="file" id="img-input-main" accept=".jpg,.jpeg,.png,.webp" multiple onchange="handleFiles(this.files)">
+        <div class="upload-icon">📷</div>
+        <div class="upload-title">تصاویر ملک را اینجا بکشید یا کلیک کنید</div>
+        <div class="upload-sub">JPG، PNG، WEBP | حداکثر ۵ مگابایت هر تصویر | تا ۳ تصویر</div>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">
+          <span style="font-size:0.78rem;background:rgba(27,79,114,0.1);color:var(--primary);padding:0.3rem 0.75rem;border-radius:20px">✅ نمای بیرونی</span>
+          <span style="font-size:0.78rem;background:rgba(27,79,114,0.1);color:var(--primary);padding:0.3rem 0.75rem;border-radius:20px">✅ نمای داخلی</span>
+          <span style="font-size:0.78rem;background:rgba(27,79,114,0.1);color:var(--primary);padding:0.3rem 0.75rem;border-radius:20px">✅ آشپزخانه</span>
+          <span style="font-size:0.78rem;background:rgba(27,79,114,0.1);color:var(--primary);padding:0.3rem 0.75rem;border-radius:20px">✅ حمام</span>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="upload-progress" id="upload-progress">
+        <div class="upload-progress-bar" id="upload-bar"></div>
+      </div>
+
+      <!-- Preview Grid -->
+      <div class="img-preview-grid" id="preview-grid"></div>
+
+      <!-- Tips -->
+      <div class="alert alert-info mt-2">
+        💡 <strong>نکته:</strong> آگهی‌هایی با تصویر <strong>۴ برابر</strong> بیشتر دیده می‌شوند. اولین تصویر به عنوان تصویر اصلی نمایش داده می‌شود.
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div style="display:flex;gap:1rem;justify-content:flex-end;align-items:center">
+    <a href="/pages/properties.html" class="btn btn-ghost">انصراف</a>
+    <button class="btn btn-primary btn-lg" id="submit-btn" onclick="submitListing()" style="padding:0.85rem 2rem;font-size:1rem">
+      ✅ ثبت آگهی
+    </button>
+  </div>
+</div>
+
+<script src="/js/main.js"></script>
+<script>
+  if (!requireAuth()) {}
+
+  let uploadedImages = []; // [{file, preview, uploaded: false}]
+  let createdPropertyId = null;
+
+  // Load locations
+  loadLocations(document.getElementById('location_id'));
+
+  // Drag & Drop
+  const zone = document.querySelector('.upload-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+
+  function handleFiles(files) {
+    const remaining = 3 - uploadedImages.length;
+    if (remaining <= 0) { showToast('حداکثر ۳ تصویر مجاز است', 'warning'); return; }
+    const toAdd = Array.from(files).slice(0, remaining);
+    toAdd.forEach(file => {
+      if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { showToast(`${file.name} نوع مجاز نیست`, 'error'); return; }
+      if (file.size > 5 * 1024 * 1024) { showToast(`${file.name} بیش از ۵ مگابایت است`, 'error'); return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        uploadedImages.push({ file, preview: e.target.result, uploaded: false });
+        renderPreviews();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderPreviews() {
+    const grid = document.getElementById('preview-grid');
+    grid.innerHTML = uploadedImages.map((img, i) => `
+      <div class="img-prev-wrap ${i===0?'primary':''}" id="prev-${i}">
+        <img src="${img.preview}" alt="">
+        <div class="img-prev-overlay">
+          ${i > 0 ? `<button class="img-prev-btn" onclick="setPrimary(${i})" title="تصویر اصلی">📌</button>` : ''}
+          <button class="img-prev-btn" onclick="removeImg(${i})" title="حذف" style="background:#E74C3C;color:white">🗑️</button>
+        </div>
+        <div class="img-count-badge">${i===0?'اصلی':i+1}</div>
+      </div>`).join('') +
+      (uploadedImages.length < 3 ? `
+        <div class="add-more-btn">
+          <input type="file" accept=".jpg,.jpeg,.png,.webp" multiple onchange="handleFiles(this.files)">
+          <span style="font-size:1.5rem">➕</span>
+          <span>افزودن تصویر</span>
+        </div>` : '');
+
+    // Hide/show upload zone
+    document.getElementById('upload-zone-wrap').style.display = uploadedImages.length > 0 ? 'none' : 'block';
+
+    // Update steps
+    if (uploadedImages.length > 0) {
+      document.getElementById('s4').classList.add('active');
+    }
+  }
+
+  function setPrimary(idx) {
+    const img = uploadedImages.splice(idx, 1)[0];
+    uploadedImages.unshift(img);
+    renderPreviews();
+    showToast('تصویر اصلی تغییر کرد', 'success');
+  }
+
+  function removeImg(idx) {
+    uploadedImages.splice(idx, 1);
+    renderPreviews();
+  }
+
+  // Price calculator
+  function calcPPM() {
+    const area  = parseFloat(document.getElementById('area').value);
+    const price = parseFloat(document.getElementById('total_price').value);
+    if (area > 0 && price > 0) {
+      const ppm = Math.round(price / area);
+      document.getElementById('price_per_meter').value = ppm;
+      document.getElementById('price-preview').style.display = 'block';
+      document.getElementById('price-preview-val').textContent = formatPrice(price);
+      document.getElementById('ppm-preview-val').textContent = `هر متر: ${formatPrice(ppm)}`;
+    } else {
+      document.getElementById('price-preview').style.display = 'none';
+    }
+  }
+  document.getElementById('area').addEventListener('input', calcPPM);
+
+  // Update steps indicator
+  ['title','property_type','deed_type','location_id'].forEach(id => {
+    document.getElementById(id).addEventListener('change', updateSteps);
+    document.getElementById(id).addEventListener('input', updateSteps);
+  });
+  ['area','total_price'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateSteps);
+  });
+
+  function updateSteps() {
+    const s1 = document.getElementById('title').value &&
+               document.getElementById('property_type').value &&
+               document.getElementById('deed_type').value &&
+               document.getElementById('location_id').value;
+    const s2 = document.getElementById('area').value && document.getElementById('total_price').value;
+
+    if (s1) { document.getElementById('s1').classList.add('done'); document.getElementById('s2').classList.add('active'); }
+    if (s2) { document.getElementById('s2').classList.add('done'); document.getElementById('s3').classList.add('active'); }
+  }
+
+  async function submitListing() {
+    const alertEl = document.getElementById('form-alert');
+    const btn = document.getElementById('submit-btn');
+    alertEl.innerHTML = '';
+
+    const title         = document.getElementById('title').value.trim();
+    const property_type = document.getElementById('property_type').value;
+    const deed_type     = document.getElementById('deed_type').value;
+    const location_id   = document.getElementById('location_id').value;
+    const area          = document.getElementById('area').value;
+    const total_price   = document.getElementById('total_price').value;
+
+    if (!title || !property_type || !deed_type || !location_id || !area || !total_price) {
+      alertEl.innerHTML = `<div class="alert alert-warning">⚠️ لطفاً تمام فیلدهای الزامی را پر کنید</div>`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner spinner-sm"></div> در حال ثبت آگهی...`;
+
+    // Step 1: Create property
+    const body = {
+      title, property_type, deed_type,
+      location_id: parseInt(location_id),
+      area: parseFloat(area),
+      total_price: parseFloat(total_price),
+      price_per_meter: document.getElementById('price_per_meter').value || null,
+      rooms:        parseInt(document.getElementById('rooms').value) || 0,
+      bathrooms:    parseInt(document.getElementById('bathrooms').value) || 0,
+      building_age: document.getElementById('building_age').value || null,
+      floor:        document.getElementById('floor').value || null,
+      direction:    document.getElementById('direction').value || null,
+      parking:      document.getElementById('parking').checked,
+      storage:      document.getElementById('storage').checked,
+      elevator:     document.getElementById('elevator').checked,
+      description:  document.getElementById('description').value.trim() || null,
+    };
+
+    const {ok, data} = await apiFetch('/properties', {
+      method: 'POST', body: JSON.stringify(body)
+    });
+
+    if (!ok || !data.success) {
+      btn.disabled = false;
+      btn.innerHTML = '✅ ثبت آگهی';
+      alertEl.innerHTML = `<div class="alert alert-danger">❌ ${data.message||'خطا در ثبت آگهی'}</div>`;
+      window.scrollTo({top:0,behavior:'smooth'});
+      return;
+    }
+
+    createdPropertyId = data.property.id;
+
+    // Step 2: Upload images if any
+    if (uploadedImages.length > 0) {
+      btn.innerHTML = `<div class="spinner spinner-sm"></div> در حال آپلود تصاویر... (۰/${uploadedImages.length})`;
+      const progress = document.getElementById('upload-progress');
+      const bar = document.getElementById('upload-bar');
+      progress.style.display = 'block';
+
+      for (let i = 0; i < uploadedImages.length; i++) {
+        const formData = new FormData();
+        formData.append('image', uploadedImages[i].file);
+        bar.style.width = `${((i+1)/uploadedImages.length)*100}%`;
+        btn.innerHTML = `<div class="spinner spinner-sm"></div> آپلود تصویر ${i+1} از ${uploadedImages.length}...`;
+        await apiFetch(`/properties/${createdPropertyId}/images`, {
+          method: 'POST', body: formData
+        });
+      }
+    }
+
+    showToast('آگهی با موفقیت ثبت شد! 🎉', 'success');
+    setTimeout(() => location.href = `/pages/property-detail.html?id=${createdPropertyId}`, 1000);
+  }
+
+  function formatPrice(n) {
+    if (!n) return '---';
+    n = parseInt(n);
+    if (n >= 1_000_000_000) return (n/1_000_000_000).toFixed(1).replace(/\.0$/,'') + ' میلیارد تومان';
+    if (n >= 1_000_000) return (n/1_000_000).toFixed(0) + ' میلیون تومان';
+    return n.toLocaleString('fa-IR') + ' تومان';
+  }
+</script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

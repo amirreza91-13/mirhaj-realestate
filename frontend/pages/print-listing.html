@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>چاپ آگهی - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* ---- Screen Controls ---- */
+    .print-controls {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: var(--primary);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 1000;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    .print-controls h3 { font-size: 1rem; font-weight: 700; }
+    .print-controls-btns { display: flex; gap: 0.5rem; }
+    body { padding-top: 60px; background: #e8eef4; }
+
+    /* ---- A4 Page ---- */
+    .a4-page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 1.5rem auto;
+      background: white;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.15);
+      padding: 12mm 14mm;
+      position: relative;
+      font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+      direction: rtl;
+      overflow: hidden;
+    }
+
+    /* Watermark */
+    .a4-page::before {
+      content: 'املاک میرحاج';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      font-size: 5rem;
+      font-weight: 900;
+      color: rgba(27,79,114,0.04);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 0;
+      letter-spacing: 0.2em;
+    }
+
+    .a4-page > * { position: relative; z-index: 1; }
+
+    /* ---- Header ---- */
+    .pdf-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 8mm;
+      border-bottom: 3px solid var(--primary);
+      margin-bottom: 7mm;
+    }
+    .pdf-logo {
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .pdf-logo-icon {
+      width: 52px; height: 52px;
+      background: var(--primary);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      color: white;
+    }
+    .pdf-logo-text h1 { font-size: 1.4rem; color: var(--primary); font-weight: 900; margin: 0; }
+    .pdf-logo-text p  { font-size: 0.72rem; color: var(--text-muted); margin: 0.1rem 0 0; }
+
+    .pdf-header-info { text-align: left; font-size: 0.72rem; color: var(--text-muted); line-height: 1.8; }
+    .pdf-header-info strong { color: var(--text-primary); }
+
+    /* ---- Property Title ---- */
+    .pdf-title-section {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border-radius: 10px;
+      padding: 5mm 7mm;
+      margin-bottom: 6mm;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .pdf-title-section h2 { font-size: 1.15rem; font-weight: 800; margin: 0; }
+    .pdf-title-section .pdf-price {
+      text-align: left;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 0.4rem 0.85rem;
+    }
+    .pdf-title-section .pdf-price .label { font-size: 0.7rem; opacity: 0.85; }
+    .pdf-title-section .pdf-price .value { font-size: 1.1rem; font-weight: 900; white-space: nowrap; }
+
+    /* ---- Image + Info ---- */
+    .pdf-main-grid {
+      display: grid;
+      grid-template-columns: 85mm 1fr;
+      gap: 6mm;
+      margin-bottom: 6mm;
+    }
+    .pdf-image {
+      height: 62mm;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem;
+      border: 1.5px solid var(--border);
+    }
+    .pdf-image img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ---- Specs Grid ---- */
+    .pdf-specs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5mm;
+    }
+    .pdf-spec-item {
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 2.5mm 3.5mm;
+      display: flex; flex-direction: column;
+      border-right: 3px solid var(--primary);
+    }
+    .pdf-spec-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 500; margin-bottom: 1mm; }
+    .pdf-spec-value { font-size: 0.82rem; font-weight: 700; color: var(--text-primary); }
+
+    /* ---- Features Row ---- */
+    .pdf-features {
+      display: flex; gap: 3mm; flex-wrap: wrap;
+      margin-bottom: 5mm;
+    }
+    .pdf-feature {
+      background: #EBF5FB;
+      color: var(--primary);
+      border-radius: 20px;
+      padding: 1.5mm 4mm;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: 1px solid #AED6F1;
+    }
+    .pdf-feature.yes { background: #EAFAF1; color: var(--success); border-color: #A9DFBF; }
+    .pdf-feature.no  { background: #FDEDEC; color: var(--danger); border-color: #F5B7B1; }
+
+    /* ---- Description ---- */
+    .pdf-description {
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 4mm;
+      margin-bottom: 5mm;
+    }
+    .pdf-description h4 { font-size: 0.8rem; color: var(--primary); margin: 0 0 2mm; }
+    .pdf-description p  { font-size: 0.75rem; line-height: 1.9; color: var(--text-secondary); margin: 0; }
+
+    /* ---- Extra Images ---- */
+    .pdf-extra-images {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3mm;
+      margin-bottom: 5mm;
+    }
+    .pdf-extra-img {
+      height: 28mm;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .pdf-extra-img img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ---- Footer ---- */
+    .pdf-footer {
+      border-top: 2px solid var(--border);
+      padding-top: 4mm;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .pdf-footer-contact { font-size: 0.72rem; line-height: 1.9; color: var(--text-secondary); }
+    .pdf-footer-contact strong { color: var(--primary); }
+    .pdf-qr {
+      width: 22mm; height: 22mm;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 2mm;
+      background: var(--bg);
+    }
+    .pdf-footer-stamp {
+      text-align: center;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+    .pdf-footer-stamp .stamp-code {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+
+    /* ---- Print Styles ---- */
+    @media print {
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      body { padding: 0; background: white; }
+      .print-controls { display: none !important; }
+      .a4-page {
+        width: 100%; margin: 0; padding: 10mm 12mm;
+        box-shadow: none;
+        min-height: auto;
+      }
+      @page { size: A4; margin: 0; }
+    }
+
+    @media (max-width: 768px) {
+      body { padding-top: 55px; }
+      .a4-page { width: 100%; margin: 0.5rem; padding: 5mm; }
+      .pdf-main-grid { grid-template-columns: 1fr; }
+      .pdf-image { height: 50mm; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Screen Controls -->
+<div class="print-controls">
+  <h3>🖨️ چاپ / دانلود آگهی</h3>
+  <div class="print-controls-btns">
+    <button class="btn btn-ghost" style="color:white;border-color:rgba(255,255,255,0.4)" onclick="history.back()">← بازگشت</button>
+    <button class="btn" style="background:rgba(255,255,255,0.15);color:white;border:1.5px solid rgba(255,255,255,0.4)" onclick="window.print()">🖨️ چاپ</button>
+    <button class="btn" style="background:white;color:var(--primary)" onclick="savePDF()">⬇️ ذخیره PDF</button>
+  </div>
+</div>
+
+<!-- Loading -->
+<div id="loading" style="text-align:center;padding:4rem">
+  <div class="spinner"></div>
+  <p style="margin-top:1rem;color:var(--text-muted)">در حال بارگذاری آگهی...</p>
+</div>
+
+<!-- A4 Page -->
+<div class="a4-page" id="a4-page" style="display:none">
+
+  <!-- Header -->
+  <div class="pdf-header">
+    <div class="pdf-logo">
+      <div class="pdf-logo-icon">🏠</div>
+      <div class="pdf-logo-text">
+        <h1>املاک میرحاج</h1>
+        <p>سامانه معاملات ملکی جرقویه اصفهان</p>
+      </div>
+    </div>
+    <div class="pdf-header-info">
+      <div>📅 تاریخ چاپ: <strong id="print-date"></strong></div>
+      <div>🔢 کد آگهی: <strong id="print-code"></strong></div>
+      <div>📍 منطقه: <strong id="print-region"></strong></div>
+    </div>
+  </div>
+
+  <!-- Title & Price -->
+  <div class="pdf-title-section">
+    <div>
+      <div style="font-size:0.75rem;opacity:0.85;margin-bottom:0.25rem" id="pdf-type-badge"></div>
+      <h2 id="pdf-title"></h2>
+      <div style="font-size:0.78rem;opacity:0.85;margin-top:0.25rem" id="pdf-location"></div>
+    </div>
+    <div class="pdf-price">
+      <div class="label">قیمت کل</div>
+      <div class="value" id="pdf-price"></div>
+      <div style="font-size:0.68rem;opacity:0.8;margin-top:0.2rem" id="pdf-ppm"></div>
+    </div>
+  </div>
+
+  <!-- Main: Image + Specs -->
+  <div class="pdf-main-grid">
+    <div class="pdf-image" id="pdf-main-image">🏠</div>
+    <div class="pdf-specs" id="pdf-specs"></div>
+  </div>
+
+  <!-- Features -->
+  <div class="pdf-features" id="pdf-features"></div>
+
+  <!-- Extra Images -->
+  <div class="pdf-extra-images" id="pdf-extra-images"></div>
+
+  <!-- Description -->
+  <div class="pdf-description" id="pdf-desc-box" style="display:none">
+    <h4>📝 توضیحات</h4>
+    <p id="pdf-description"></p>
+  </div>
+
+  <!-- Footer -->
+  <div class="pdf-footer">
+    <div class="pdf-footer-contact">
+      <div><strong>📞 تلفن دفتر:</strong> ۰۳۱-XXXXXXXX</div>
+      <div><strong>📍 آدرس:</strong> جرقویه، نصرآباد</div>
+      <div><strong>🕐 ساعت کاری:</strong> شنبه تا چهارشنبه ۸ الی ۱۸</div>
+      <div style="margin-top:1mm;color:var(--primary);font-weight:700">www.mirhaj-realestate.ir</div>
+    </div>
+    <div class="pdf-footer-stamp">
+      <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:1mm">کد پیگیری آگهی</div>
+      <div class="stamp-code" id="pdf-stamp-code"></div>
+      <div style="font-size:0.6rem;color:var(--text-muted);margin-top:1mm">این برگه توسط سیستم تولید شده</div>
+    </div>
+    <div class="pdf-qr" id="pdf-qr">
+      📱<br>اسکن کنید<br>برای مشاهده<br>آنلاین
+    </div>
+  </div>
+
+</div>
+
+<script src="/js/main.js"></script>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const propertyId = params.get('id');
+  if (!propertyId) location.href = '/pages/properties.html';
+
+  const PROPERTY_TYPES = {
+    apartment:'آپارتمان', villa:'ویلا', land:'زمین',
+    commercial:'تجاری', workshop:'کارگاه', storage:'انباری',
+    garden:'باغ', other:'سایر'
+  };
+  const DEED_TYPES = { single_page:'تک برگ', mangooledar:'منقوله‌دار', other:'سایر' };
+
+  async function loadAndRender() {
+    const { ok, data } = await apiFetch(`/properties/${propertyId}`);
+    document.getElementById('loading').style.display = 'none';
+
+    if (!ok || !data.success) {
+      document.getElementById('loading').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">❌</div>
+          <h3>آگهی یافت نشد</h3>
+          <a href="/pages/properties.html" class="btn btn-primary">بازگشت</a>
+        </div>`;
+      document.getElementById('loading').style.display = 'block';
+      return;
+    }
+
+    const p = data.property;
+    renderPDF(p);
+    document.getElementById('a4-page').style.display = 'block';
+    document.title = `چاپ آگهی - ${p.title}`;
+  }
+
+  function renderPDF(p) {
+    // Header info
+    document.getElementById('print-date').textContent = new Date().toLocaleDateString('fa-IR');
+    document.getElementById('print-code').textContent = `MRJ-${String(p.id).padStart(5, '0')}`;
+    document.getElementById('print-region').textContent = p.location_name || '---';
+    document.getElementById('pdf-stamp-code').textContent = `MRJ-${String(p.id).padStart(5, '0')}`;
+
+    // Title section
+    document.getElementById('pdf-type-badge').textContent =
+      `🏷️ ${PROPERTY_TYPES[p.property_type] || p.property_type} | سند: ${DEED_TYPES[p.deed_type] || p.deed_type}`;
+    document.getElementById('pdf-title').textContent = p.title;
+    document.getElementById('pdf-location').textContent = `📍 ${p.location_name || '---'}`;
+    document.getElementById('pdf-price').textContent = formatPrice(p.total_price);
+    if (p.price_per_meter) {
+      document.getElementById('pdf-ppm').textContent = `هر متر: ${formatPrice(p.price_per_meter)}`;
+    }
+
+    // Main image
+    if (p.images && p.images.length > 0) {
+      const primary = p.images.find(i => i.is_primary) || p.images[0];
+      document.getElementById('pdf-main-image').innerHTML =
+        `<img src="/${primary.filepath}" alt="${p.title}" onerror="this.parentElement.innerHTML='🏠'">`;
+    }
+
+    // Extra images (2nd and 3rd)
+    const extraImages = document.getElementById('pdf-extra-images');
+    if (p.images && p.images.length > 1) {
+      const extras = p.images.slice(1, 4);
+      extraImages.innerHTML = extras.map(img =>
+        `<div class="pdf-extra-img"><img src="/${img.filepath}" onerror="this.parentElement.innerHTML='🏠'"></div>`
+      ).join('');
+    } else {
+      extraImages.style.display = 'none';
+    }
+
+    // Specs grid
+    const specs = [
+      { label: 'متراژ',          value: p.area ? `${p.area} متر مربع` : '---' },
+      { label: 'تعداد اتاق',     value: p.rooms !== null ? p.rooms : '---' },
+      { label: 'سرویس بهداشتی',  value: p.bathrooms !== null ? p.bathrooms : '---' },
+      { label: 'سن بنا',         value: p.building_age ? `${p.building_age} سال` : '---' },
+      { label: 'طبقه',           value: p.floor || '---' },
+      { label: 'جهت',            value: p.direction || '---' },
+      { label: 'نوع سند',        value: DEED_TYPES[p.deed_type] || '---' },
+      { label: 'قیمت هر متر',    value: p.price_per_meter ? formatPrice(p.price_per_meter) : '---' },
+    ];
+    document.getElementById('pdf-specs').innerHTML = specs.map(s => `
+      <div class="pdf-spec-item">
+        <div class="pdf-spec-label">${s.label}</div>
+        <div class="pdf-spec-value">${s.value}</div>
+      </div>`).join('');
+
+    // Features
+    const features = [];
+    features.push(`🏠 ${PROPERTY_TYPES[p.property_type] || p.property_type}`);
+    if (p.area) features.push(`📐 ${p.area} م²`);
+    if (p.rooms) features.push(`🛏️ ${p.rooms} اتاق`);
+    features.push(p.parking  ? `<span class="yes">🚗 پارکینگ دارد</span>` : `<span class="no">🚗 بدون پارکینگ</span>`);
+    features.push(p.storage  ? `<span class="yes">📦 انباری دارد</span>`  : `<span class="no">📦 بدون انباری</span>`);
+    features.push(p.elevator ? `<span class="yes">🛗 آسانسور دارد</span>` : `<span class="no">🛗 بدون آسانسور</span>`);
+
+    document.getElementById('pdf-features').innerHTML = features.map(f =>
+      f.startsWith('<') ? f : `<span class="pdf-feature">${f}</span>`
+    ).join('');
+
+    // Description
+    if (p.description) {
+      document.getElementById('pdf-desc-box').style.display = 'block';
+      document.getElementById('pdf-description').textContent = p.description;
+    }
+  }
+
+  function savePDF() {
+    showToast('برای ذخیره PDF از گزینه "Save as PDF" در پنجره چاپ استفاده کنید', 'info', 5000);
+    setTimeout(() => window.print(), 600);
+  }
+
+  // Format price helper
+  function formatPrice(price) {
+    if (!price) return '---';
+    const n = parseInt(price);
+    if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + ' میلیارد تومان';
+    if (n >= 1_000_000)     return (n / 1_000_000).toFixed(0) + ' میلیون تومان';
+    return n.toLocaleString('fa-IR') + ' تومان';
+  }
+
+  loadAndRender();
+</script>
+</body>
+</html>

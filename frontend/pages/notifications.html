@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اطلاعیه‌ها - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand"><div class="brand-icon">🏠</div><span>املاک میرحاج</span></a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+      <li><a href="/pages/messages.html">💬 پیام‌ها</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth"><a href="/pages/login.html" class="btn btn-outline btn-sm">ورود</a></div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.3rem 0.75rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:110%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="#" onclick="logout()" style="display:block;padding:0.6rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>🔔 اطلاعیه‌ها</h1>
+    <div class="breadcrumb"><a href="/pages/index.html">خانه</a><span>اطلاعیه‌ها</span></div>
+  </div>
+</div>
+
+<div class="container" style="max-width:700px;padding-bottom:3rem">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;gap:0.5rem">
+    <button class="btn btn-ghost btn-sm" onclick="markAllRead()">✓ همه خوانده شد</button>
+    <button class="btn btn-ghost btn-sm" onclick="loadNotifications()">🔄 بروزرسانی</button>
+  </div>
+  <div id="notif-list">
+    <div class="loading-overlay"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<script src="/js/main.js"></script>
+<script>
+  if (!requireAuth()) {}
+
+  const NOTIF_ICONS = {
+    message: '💬', property: '🏠', system: '⚙️',
+    success: '✅', warning: '⚠️', info: 'ℹ️', error: '❌'
+  };
+
+  async function loadNotifications() {
+    const { data } = await apiFetch('/notifications');
+    const list = document.getElementById('notif-list');
+
+    if (!data.success || data.notifications.length === 0) {
+      list.innerHTML = `<div class="empty-state">
+        <div class="empty-icon">🔔</div>
+        <h3>اطلاعیه‌ای ندارید</h3>
+        <p>وقتی اتفاق جدیدی بیفتد اینجا نشان داده می‌شود</p>
+      </div>`;
+      return;
+    }
+
+    list.innerHTML = data.notifications.map(n => `
+      <div class="card mb-2 ${!n.is_read ? 'card-glow' : ''}"
+           style="border-right:4px solid ${!n.is_read ? 'var(--primary)' : 'var(--border)'}; cursor:pointer"
+           onclick="readNotif(${n.id}, '${n.link || ''}', this)">
+        <div class="card-body" style="display:flex;gap:1rem;align-items:flex-start">
+          <div style="font-size:1.8rem;flex-shrink:0">${NOTIF_ICONS[n.type] || '🔔'}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:${!n.is_read ? '700' : '500'};margin-bottom:0.2rem">${n.title}</div>
+            ${n.body ? `<div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6">${n.body}</div>` : ''}
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.4rem">${formatDate(n.created_at)}</div>
+          </div>
+          <div style="display:flex;gap:0.3rem;flex-shrink:0">
+            ${!n.is_read ? '<span class="badge badge-primary" style="font-size:0.65rem">جدید</span>' : ''}
+            <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();deleteNotif(${n.id},this)" style="padding:0.2rem 0.4rem">🗑️</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  async function readNotif(id, link, el) {
+    await apiFetch(`/notifications/${id}/read`, { method: 'PUT' });
+    el.style.borderRightColor = 'var(--border)';
+    el.querySelector('[style*="font-weight"]').style.fontWeight = '500';
+    const badge = el.querySelector('.badge-primary');
+    if (badge) badge.remove();
+    if (link) location.href = link;
+  }
+
+  async function deleteNotif(id, btn) {
+    await apiFetch(`/notifications/${id}`, { method: 'DELETE' });
+    btn.closest('.card').remove();
+  }
+
+  async function markAllRead() {
+    await apiFetch('/notifications/read-all', { method: 'PUT' });
+    showToast('همه اطلاعیه‌ها خوانده شدند ✅', 'success');
+    loadNotifications();
+  }
+
+  function formatDate(d) {
+    if (!d) return '';
+    return new Date(d).toLocaleString('fa-IR');
+  }
+
+  loadNotifications();
+</script>
+</body>
+</html>

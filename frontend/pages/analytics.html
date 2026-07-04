@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>آنالیتیکس - مدیر میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <style>
+    .stat-card { background:white; border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; display:flex; align-items:center; gap:1rem; transition:var(--transition); }
+    .stat-card:hover { box-shadow:var(--shadow); transform:translateY(-2px); }
+    .stat-icon { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
+    .stat-val { font-size:1.7rem; font-weight:900; line-height:1; }
+    .stat-label { font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem; }
+    .stat-trend { font-size:0.75rem; font-weight:600; margin-top:0.3rem; }
+    .trend-up { color:var(--success); }
+    .trend-down { color:var(--danger); }
+    .chart-box { background:white; border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem; }
+    .chart-box h4 { font-size:0.95rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
+    .bar-chart { display:flex; align-items:flex-end; gap:0.5rem; height:160px; padding-top:1rem; }
+    .bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:0.4rem; height:100%; justify-content:flex-end; }
+    .bar { width:100%; background:linear-gradient(to top,var(--primary),var(--primary-light)); border-radius:4px 4px 0 0; transition:height 0.6s ease; min-height:4px; position:relative; cursor:pointer; }
+    .bar:hover { opacity:0.85; }
+    .bar-label { font-size:0.68rem; color:var(--text-muted); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+    .bar-val { font-size:0.72rem; font-weight:700; color:var(--primary); }
+    .donut { position:relative; width:160px; height:160px; margin:0 auto; }
+    .donut svg { transform:rotate(-90deg); }
+    .donut-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+    .top-prop { display:flex; align-items:center; gap:0.85rem; padding:0.75rem 0; border-bottom:1px solid var(--border); }
+    .top-prop:last-child { border-bottom:none; }
+    .top-prop img { width:52px; height:40px; border-radius:6px; object-fit:cover; flex-shrink:0; }
+    .top-prop-rank { width:24px; height:24px; border-radius:50%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; flex-shrink:0; }
+  </style>
+  <script src="/js/protect.js"></script>
+</head>
+<body>
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <img src="/assets/logo-small.svg" alt="املاک میرحاج" style="height:40px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="brand-icon" style="display:none">🏠</div>
+      <span>املاک میرحاج</span>
+    </a>
+    <div class="navbar-actions">
+      <div id="nav-auth"><a href="/pages/login.html" class="btn btn-outline btn-sm">ورود</a></div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="/pages/dashboard-manager.html" class="btn btn-outline btn-sm">← داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.35rem 0.85rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:115%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="#" onclick="logout()" style="display:block;padding:0.65rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>📊 داشبورد آنالیتیکس</h1>
+    <div class="breadcrumb"><a href="/pages/dashboard-manager.html">داشبورد</a><span>آنالیتیکس</span></div>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:3rem">
+
+  <!-- Stats Grid -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem" id="stats-grid">
+    <div class="loading-overlay" style="grid-column:1/-1"><div class="spinner"></div></div>
+  </div>
+
+  <!-- Charts Row 1 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem">
+    <div class="chart-box">
+      <h4>🏠 آگهی‌ها بر اساس نوع</h4>
+      <div class="bar-chart" id="type-chart"></div>
+    </div>
+    <div class="chart-box">
+      <h4>📍 آگهی‌ها بر اساس منطقه</h4>
+      <div class="bar-chart" id="location-chart"></div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+    <div class="chart-box">
+      <h4>📈 روند ثبت‌نام (۳۰ روز اخیر)</h4>
+      <div id="trend-chart" style="height:180px;display:flex;align-items:flex-end;gap:2px;padding-top:1rem"></div>
+    </div>
+    <div class="chart-box">
+      <h4>👁️ پربازدیدترین آگهی‌ها</h4>
+      <div id="top-props"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/main.js"></script>
+<script src="/js/charts.js"></script>
+<script>
+  if (!requireAuth()) {}
+  if (getUser()?.role !== 'manager') { location.href = '/pages/index.html'; }
+
+  const TYPE_LABELS = { apartment:'آپارتمان', villa:'ویلا', land:'زمین', commercial:'تجاری', workshop:'کارگاه', storage:'انباری', garden:'باغ', other:'سایر' };
+  const COLORS = ['#1B4F72','#2E86C1','#E67E22','#27AE60','#8E44AD','#E74C3C','#F39C12','#16A085'];
+
+  async function loadAll() {
+    const [ovRes, typeRes, locRes, trendRes, topRes] = await Promise.all([
+      apiFetch('/analytics/overview'),
+      apiFetch('/analytics/props-by-type'),
+      apiFetch('/analytics/props-by-location'),
+      apiFetch('/analytics/registrations-trend'),
+      apiFetch('/analytics/top-properties'),
+    ]);
+
+    if (ovRes.data.success) renderStats(ovRes.data.stats);
+    if (typeRes.data.success) renderBarChart('type-chart', typeRes.data.data.map(d => ({ label: TYPE_LABELS[d.property_type]||d.property_type, value: d.count })));
+    if (locRes.data.success) renderBarChart('location-chart', locRes.data.data.map(d => ({ label: d.name, value: d.count })));
+    if (trendRes.data.success) renderTrend(trendRes.data.data);
+    if (topRes.data.success) renderTopProps(topRes.data.data);
+  }
+
+  function renderStats(s) {
+    const cards = [
+      { icon:'🏠', label:'کل آگهی‌ها', val: s.totalProps, color:'#EBF5FB', trend: `+${s.recentProps} این هفته`, up: true },
+      { icon:'✅', label:'آگهی‌های فعال', val: s.activeProps, color:'#EAFAF1', trend: `${Math.round(s.activeProps/s.totalProps*100)||0}% از کل`, up: true },
+      { icon:'👥', label:'کل کاربران', val: s.totalUsers, color:'#FEF9E7', trend: `+${s.recentUsers} این هفته`, up: true },
+      { icon:'💬', label:'پیام‌ها', val: s.totalMessages, color:'#FDEDEC', trend: 'کل پیام‌های ارسالی', up: true },
+      { icon:'🔖', label:'علاقه‌مندی‌ها', val: s.totalBookmarks, color:'#F4ECF7', trend: 'کل بوکمارک‌ها', up: true },
+      { icon:'👁️', label:'کل بازدیدها', val: s.totalViews, color:'#EBF5FB', trend: 'مجموع بازدید آگهی‌ها', up: true },
+      { icon:'💰', label:'میانگین قیمت', val: formatPrice(s.avgPrice), color:'#EAFAF1', trend: 'میانگین آگهی‌های فعال', up: true },
+      { icon:'📈', label:'بالاترین قیمت', val: formatPrice(s.maxPrice), color:'#FDFEFE', trend: 'گران‌ترین آگهی', up: true },
+    ];
+
+    document.getElementById('stats-grid').innerHTML = cards.map(c => `
+      <div class="stat-card animate-fade-up">
+        <div class="stat-icon" style="background:${c.color}">${c.icon}</div>
+        <div>
+          <div class="stat-val">${typeof c.val === 'number' ? c.val.toLocaleString('fa-IR') : c.val}</div>
+          <div class="stat-label">${c.label}</div>
+          <div class="stat-trend ${c.up?'trend-up':'trend-down'}">${c.up?'↑':'↓'} ${c.trend}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderBarChart(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!data.length) { container.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem">داده‌ای موجود نیست</div>'; return; }
+    const max = Math.max(...data.map(d => d.value), 1);
+    container.innerHTML = data.map((d, i) => `
+      <div class="bar-wrap">
+        <div class="bar-val">${d.value.toLocaleString('fa-IR')}</div>
+        <div class="bar" style="height:${Math.max((d.value/max)*120, 4)}px;background:${COLORS[i%COLORS.length]}" title="${d.label}: ${d.value}"></div>
+        <div class="bar-label" title="${d.label}">${d.label}</div>
+      </div>`).join('');
+  }
+
+  function renderTrend(data) {
+    const container = document.getElementById('trend-chart');
+    if (!data.length) { container.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:1rem">داده‌ای موجود نیست</div>'; return; }
+    const max = Math.max(...data.map(d => d.count), 1);
+    container.innerHTML = data.map(d => `
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end">
+        <div style="font-size:0.65rem;color:var(--primary);font-weight:700">${d.count||''}</div>
+        <div style="width:100%;background:var(--primary);border-radius:2px 2px 0 0;min-height:2px;height:${Math.max((d.count/max)*140,2)}px;opacity:0.8" title="${d.date}: ${d.count} نفر"></div>
+        <div style="font-size:0.6rem;color:var(--text-muted);transform:rotate(-45deg);white-space:nowrap">${d.date.slice(5)}</div>
+      </div>`).join('');
+  }
+
+  function renderTopProps(data) {
+    const container = document.getElementById('top-props');
+    if (!data.length) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">👁️</div><h3 style="font-size:0.9rem">داده‌ای موجود نیست</h3></div>'; return; }
+    container.innerHTML = data.map((p, i) => `
+      <div class="top-prop">
+        <div class="top-prop-rank">${i+1}</div>
+        ${p.img ? `<img src="/${p.img}" alt="">` : '<div style="width:52px;height:40px;background:var(--bg);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">🏠</div>'}
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.title}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted)">${p.location_name||'---'}</div>
+        </div>
+        <div style="text-align:left;flex-shrink:0">
+          <div style="font-size:0.75rem;color:var(--text-muted)">👁️ ${(p.view_count||0).toLocaleString('fa-IR')}</div>
+          <div style="font-size:0.78rem;font-weight:700;color:var(--primary)">${formatPrice(p.total_price)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  loadAll();
+</script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

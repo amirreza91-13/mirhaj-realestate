@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>علاقه‌مندی‌ها - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <img src="/assets/logo-small.svg" alt="املاک میرحاج" style="height:40px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="brand-icon" style="display:none">🏠</div>
+      <span>املاک میرحاج</span>
+    </a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+      <li><a href="/pages/bookmarks.html">🔖 علاقه‌مندی‌ها</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth"><a href="/pages/login.html" class="btn btn-outline btn-sm">ورود</a></div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.3rem 0.75rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:110%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="#" onclick="logout()" style="display:block;padding:0.6rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1>🔖 آگهی‌های ذخیره شده</h1>
+    <div class="breadcrumb"><a href="/pages/index.html">خانه</a><span>علاقه‌مندی‌ها</span></div>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:3rem">
+  <div id="count-bar" style="margin-bottom:1rem;color:var(--text-muted);font-size:0.9rem"></div>
+  <div class="property-grid" id="bookmarks-grid">
+    <div class="loading-overlay" style="grid-column:1/-1"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom"><p>© ۱۴۰۵ تمامی حقوق برای املاک میرحاج محفوظ است</p></div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script src="/js/animations.js"></script>
+<script>
+  if (!requireAuth()) {}
+
+  async function load() {
+    const { data } = await apiFetch('/bookmarks');
+    const grid = document.getElementById('bookmarks-grid');
+    const countEl = document.getElementById('count-bar');
+
+    if (!data.success || data.bookmarks.length === 0) {
+      countEl.textContent = '';
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-icon">🔖</div>
+        <h3>هنوز آگهی‌ای ذخیره نکردید</h3>
+        <p>روی دکمه 🔖 در صفحه هر آگهی کلیک کنید</p>
+        <a href="/pages/properties.html" class="btn btn-primary mt-2">مشاهده آگهی‌ها</a>
+      </div>`;
+      return;
+    }
+
+    countEl.textContent = `${data.bookmarks.length} آگهی ذخیره شده`;
+
+    grid.innerHTML = data.bookmarks.map(p => `
+      <div class="property-card" style="position:relative">
+        <button onclick="remove(${p.id},this)" title="حذف از علاقه‌مندی‌ها"
+          style="position:absolute;top:0.6rem;left:0.6rem;z-index:10;background:white;border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;box-shadow:var(--shadow-sm)">
+          🔖
+        </button>
+        <div class="property-card-img" onclick="location.href='/pages/property-detail.html?id=${p.id}'" style="cursor:pointer">
+          ${p.primary_image ? `<img src="/${p.primary_image}" alt="${p.title}" loading="lazy">` : `<div class="no-image">🏠</div>`}
+          <span class="property-badge">${propertyTypeLabel(p.property_type)}</span>
+        </div>
+        <div class="property-card-body" onclick="location.href='/pages/property-detail.html?id=${p.id}'" style="cursor:pointer">
+          <div class="property-card-title">${p.title}</div>
+          <div class="property-card-location">📍 ${p.location_name || '---'}</div>
+          <div class="property-card-meta">
+            ${p.rooms ? `<span class="property-meta-item">🛏️ ${p.rooms} اتاق</span>` : ''}
+            ${p.area ? `<span class="property-meta-item">📐 ${p.area} م²</span>` : ''}
+          </div>
+          <div class="property-card-price">${formatPrice(p.total_price)}</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem">
+            ذخیره شده: ${new Date(p.bookmarked_at).toLocaleDateString('fa-IR')}
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  async function remove(id, btn) {
+    const card = btn.closest('.property-card');
+    card.style.transition = 'opacity 0.3s';
+    card.style.opacity = '0';
+    await apiFetch(`/bookmarks/${id}`, { method: 'POST' });
+    setTimeout(() => { card.remove(); load(); }, 300);
+    showToast('از علاقه‌مندی‌ها حذف شد', 'info');
+  }
+
+  load();
+</script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>داشبورد مدیر - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/protect.js"></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand">
+      <img src="/assets/logo-small.svg" alt="املاک میرحاج" style="height:40px;width:auto" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="brand-icon" style="display:none">🏠</div>
+      <span>املاک میرحاج</span>
+    </a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth"><a href="/pages/login.html" class="btn btn-outline btn-sm">ورود</a></div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.3rem 0.75rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:110%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="#" onclick="logout()" style="display:block;padding:0.6rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="padding:2rem 1.25rem 3rem">
+  <div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <div class="dashboard-sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebar-avatar">🏠</div>
+        <div style="font-weight:700;font-size:1rem" id="sidebar-name">مدیر کل</div>
+        <div style="font-size:0.8rem;opacity:0.75;margin-top:0.25rem">مدیر کل سیستم</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="active" onclick="showTab('stats');return false">📊 آمار کلی</a>
+        <a href="#" onclick="showTab('properties');return false">🏠 مدیریت آگهی‌ها</a>
+        <a href="#" onclick="showTab('users');return false">👥 مدیریت کاربران</a>
+        <a href="#" onclick="showTab('registrations');return false">📋 ثبت‌نام‌ها</a>
+        <a href="#" onclick="showTab('logs');return false">📜 لاگ فعالیت‌ها</a>
+        <a href="#" onclick="showTab('locations');return false">📍 مدیریت مناطق</a>
+        <a href="#" onclick="showTab('profile');return false">👤 پروفایل</a>
+        <a href="#" onclick="showTab('backup');return false">💾 بکاپ</a>
+        <a href="#" onclick="logout()">🚪 خروج</a>
+      </nav>
+    </div>
+
+    <!-- Content -->
+    <div class="dashboard-content">
+
+      <!-- Stats Tab -->
+      <div id="tab-stats">
+        <h2 style="margin-bottom:1.5rem">📊 آمار کلی سیستم</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem">
+          <div class="card" style="border-right:4px solid var(--primary)">
+            <div class="card-body" style="display:flex;align-items:center;gap:1rem">
+              <div style="font-size:2.5rem">🏠</div>
+              <div><div style="font-size:0.82rem;color:var(--text-muted)">کل آگهی‌ها</div><div style="font-size:1.8rem;font-weight:800;color:var(--primary)" id="stat-total-props">-</div></div>
+            </div>
+          </div>
+          <div class="card" style="border-right:4px solid var(--success)">
+            <div class="card-body" style="display:flex;align-items:center;gap:1rem">
+              <div style="font-size:2.5rem">✅</div>
+              <div><div style="font-size:0.82rem;color:var(--text-muted)">آگهی‌های فعال</div><div style="font-size:1.8rem;font-weight:800;color:var(--success)" id="stat-active-props">-</div></div>
+            </div>
+          </div>
+          <div class="card" style="border-right:4px solid var(--accent)">
+            <div class="card-body" style="display:flex;align-items:center;gap:1rem">
+              <div style="font-size:2.5rem">👥</div>
+              <div><div style="font-size:0.82rem;color:var(--text-muted)">کل کاربران</div><div style="font-size:1.8rem;font-weight:800;color:var(--accent)" id="stat-total-users">-</div></div>
+            </div>
+          </div>
+          <div class="card" style="border-right:4px solid var(--info)">
+            <div class="card-body" style="display:flex;align-items:center;gap:1rem">
+              <div style="font-size:2.5rem">🧑‍💼</div>
+              <div><div style="font-size:0.82rem;color:var(--text-muted)">مشاوران</div><div style="font-size:1.8rem;font-weight:800;color:var(--info)" id="stat-agents">-</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">🕐 آخرین آگهی‌های ثبت شده</div>
+          <div class="card-body" id="recent-props">
+            <div class="loading-overlay"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.5rem">
+          <div class="card"><div class="card-body" id="chart-property-types"><div class="loading-overlay"><div class="spinner"></div></div></div></div>
+          <div class="card"><div class="card-body" id="chart-registrations"><div class="loading-overlay"><div class="spinner"></div></div></div></div>
+        </div>
+        <div class="card mt-3"><div class="card-body" id="chart-by-location"><div class="loading-overlay"><div class="spinner"></div></div></div></div>
+      </div>
+
+      <!-- Properties Tab -->
+      <div id="tab-properties" class="hidden">
+        <h2 style="margin-bottom:1.5rem">🏠 مدیریت آگهی‌ها</h2>
+        <div id="all-properties-list">
+          <div class="loading-overlay"><div class="spinner"></div></div>
+        </div>
+        <div class="pagination" id="props-pagination"></div>
+      </div>
+
+      <!-- Users Tab -->
+      <div id="tab-users" class="hidden">
+        <h2 style="margin-bottom:1.5rem">👥 مدیریت کاربران</h2>
+        <div class="table-wrapper">
+          <table id="users-table">
+            <thead><tr><th>کاربر</th><th>نام کامل</th><th>نقش</th><th>وضعیت</th><th>تاریخ عضویت</th><th>عملیات</th></tr></thead>
+            <tbody id="users-tbody"><tr><td colspan="6" style="text-align:center"><div class="spinner" style="margin:1rem auto"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Registrations Tab -->
+      <div id="tab-registrations" class="hidden">
+        <h2 style="margin-bottom:1.5rem">📋 لیست ثبت‌نام‌ها</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>نام کاربری</th><th>نام کامل</th><th>نقش</th><th>تاریخ ثبت‌نام</th></tr></thead>
+            <tbody id="regs-tbody"><tr><td colspan="5" style="text-align:center"><div class="spinner" style="margin:1rem auto"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Logs Tab -->
+      <div id="tab-logs" class="hidden">
+        <h2 style="margin-bottom:1.5rem">📜 لاگ فعالیت‌ها</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>کاربر</th><th>عملیات</th><th>جزئیات</th><th>تاریخ</th></tr></thead>
+            <tbody id="logs-tbody"><tr><td colspan="4" style="text-align:center"><div class="spinner" style="margin:1rem auto"></div></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="logs-pagination"></div>
+      </div>
+
+      <!-- Locations Tab -->
+      <div id="tab-locations" class="hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+          <h2>📍 مدیریت مناطق</h2>
+          <button class="btn btn-primary" onclick="openModal('add-location-modal')">➕ افزودن منطقه</button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>نام منطقه</th><th>نوع</th></tr></thead>
+            <tbody id="locations-tbody"><tr><td colspan="3" style="text-align:center"><div class="spinner" style="margin:1rem auto"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Profile Tab -->
+      <div id="tab-profile" class="hidden">
+        <h2 style="margin-bottom:1.5rem">👤 پروفایل مدیر</h2>
+        <div class="card" style="max-width:540px">
+          <div class="card-body">
+            <div id="profile-alert"></div>
+            <div class="form-group">
+              <label class="form-label">آواتار</label>
+              <div class="avatar-grid">
+                <div class="avatar-option" data-avatar="1" onclick="selectAvatar(1)">🏠</div>
+                <div class="avatar-option" data-avatar="2" onclick="selectAvatar(2)">🏡</div>
+                <div class="avatar-option" data-avatar="3" onclick="selectAvatar(3)">🏢</div>
+                <div class="avatar-option" data-avatar="4" onclick="selectAvatar(4)">🏗️</div>
+                <div class="avatar-option" data-avatar="5" onclick="selectAvatar(5)">🔑</div>
+              </div>
+              <input type="hidden" id="avatar" value="1">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">نام کاربری</label>
+                <input type="text" class="form-control" id="p-username" disabled style="background:var(--bg)">
+              </div>
+              <div class="form-group">
+                <label class="form-label">نام کامل <span class="required">*</span></label>
+                <input type="text" class="form-control" id="p-fullname">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">شماره تماس</label>
+                <input type="tel" class="form-control" id="p-phone">
+              </div>
+              <div class="form-group">
+                <label class="form-label">ایمیل</label>
+                <input type="email" class="form-control" id="p-email">
+              </div>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:0.5rem">
+              <h4 style="margin-bottom:1rem">🔒 تغییر رمز عبور</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">رمز عبور فعلی</label>
+                  <input type="password" class="form-control" id="p-current-pw">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">رمز عبور جدید</label>
+                  <input type="password" class="form-control" id="p-new-pw">
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:1rem">
+              <button class="btn btn-primary" onclick="saveProfile()">💾 ذخیره</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backup Tab -->
+      <div id="tab-backup" class="hidden">
+        <h2 style="margin-bottom:1.5rem">💾 بکاپ دیتابیس</h2>
+        <div class="card" style="max-width:480px">
+          <div class="card-body">
+            <div class="alert alert-info">ℹ️ با کلیک روی دکمه زیر، فایل دیتابیس دانلود می‌شود. این فایل شامل تمام اطلاعات سیستم است.</div>
+            <div style="text-align:center;padding:1rem">
+              <div style="font-size:4rem;margin-bottom:1rem">🗄️</div>
+              <h3 style="margin-bottom:0.5rem">دانلود بکاپ دیتابیس</h3>
+              <p class="text-muted" style="font-size:0.88rem;margin-bottom:1.5rem">فایل SQLite شامل تمام داده‌های سیستم</p>
+              <a href="/api/admin/backup" class="btn btn-primary btn-lg" onclick="showToast('در حال دانلود بکاپ...','info')">
+                ⬇️ دانلود بکاپ
+              </a>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:1rem">
+              <h4 style="margin-bottom:0.75rem;font-size:0.95rem">📌 راهنمای بازیابی بکاپ</h4>
+              <ol style="font-size:0.85rem;color:var(--text-secondary);line-height:2;padding-right:1.25rem">
+                <li>سرور را متوقف کنید</li>
+                <li>فایل بکاپ را با نام <code style="background:var(--bg);padding:0.1rem 0.4rem;border-radius:3px">mirhaj.db</code> در پوشه <code style="background:var(--bg);padding:0.1rem 0.4rem;border-radius:3px">database/</code> کپی کنید</li>
+                <li>سرور را دوباره اجرا کنید</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add Location Modal -->
+<div class="modal-overlay" id="add-location-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>➕ افزودن منطقه جدید</h3>
+      <button class="modal-close" onclick="closeModal('add-location-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="loc-alert"></div>
+      <div class="form-group">
+        <label class="form-label">نام منطقه <span class="required">*</span></label>
+        <input type="text" class="form-control" id="loc-name" placeholder="مثال: علی‌آباد">
+      </div>
+      <div class="form-group">
+        <label class="form-label">نوع <span class="required">*</span></label>
+        <select class="form-control" id="loc-type">
+          <option value="city">شهر</option>
+          <option value="village">روستا</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('add-location-modal')">انصراف</button>
+      <button class="btn btn-primary" onclick="addLocation()">➕ افزودن</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Role Modal -->
+<div class="modal-overlay" id="role-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>تغییر نقش کاربر</h3>
+      <button class="modal-close" onclick="closeModal('role-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:1rem">کاربر: <strong id="role-modal-username"></strong></p>
+      <div class="form-group">
+        <label class="form-label">نقش جدید</label>
+        <select class="form-control" id="role-select">
+          <option value="user">کاربر عادی</option>
+          <option value="agent">مشاور</option>
+          <option value="manager">مدیر کل</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('role-modal')">انصراف</button>
+      <button class="btn btn-primary" onclick="saveRole()">💾 ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom"><p>© ۱۴۰۵ تمامی حقوق برای املاک میرحاج محفوظ است</p></div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script>
+<script src="/js/charts.js"></script>
+<script src="/js/search.js"></script>
+<script src="/js/charts.js"></script>
+<script>
+  if (!requireAuth()) {}
+  if (getUser()?.role !== 'manager') { showToast('دسترسی غیرمجاز', 'error'); setTimeout(() => location.href = '/pages/index.html', 1000); }
+
+  let selectedUserId = null;
+  let propsPage = 1;
+  let logsPage = 1;
+
+  function showTab(tab) {
+    ['stats','properties','users','registrations','logs','locations','profile','backup'].forEach(t => {
+      document.getElementById(`tab-${t}`).classList.add('hidden');
+    });
+    document.getElementById(`tab-${tab}`).classList.remove('hidden');
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (tab === 'stats') loadStats();
+    else if (tab === 'properties') loadAllProperties(1);
+    else if (tab === 'users') loadUsers();
+    else if (tab === 'registrations') loadRegistrations();
+    else if (tab === 'logs') loadLogs(1);
+    else if (tab === 'locations') loadLocationsTab();
+    else if (tab === 'profile') loadProfile();
+  }
+
+  function selectAvatar(n) {
+    document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+    document.querySelector(`[data-avatar="${n}"]`).classList.add('selected');
+    document.getElementById('avatar').value = n;
+  }
+
+  // ---- Stats ----
+  async function loadStats() {
+    const { data } = await apiFetch('/admin/stats');
+    if (!data.success) return;
+    document.getElementById('stat-total-props').textContent = data.stats.totalProperties.toLocaleString('fa-IR');
+    document.getElementById('stat-active-props').textContent = data.stats.activeProperties.toLocaleString('fa-IR');
+    document.getElementById('stat-total-users').textContent = data.stats.totalUsers.toLocaleString('fa-IR');
+    document.getElementById('stat-agents').textContent = data.stats.totalAgents.toLocaleString('fa-IR');
+
+    const recentEl = document.getElementById('recent-props');
+    if (data.recentProperties?.length > 0) {
+      recentEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:0.75rem">` +
+        data.recentProperties.map(p => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--bg);border-radius:var(--radius-sm)">
+            <div>
+              <div style="font-weight:600">${p.title}</div>
+              <div style="font-size:0.82rem;color:var(--text-muted)">📍 ${p.location_name} | ${formatDate(p.created_at)}</div>
+            </div>
+            <div style="font-weight:700;color:var(--primary)">${formatPrice(p.total_price)}</div>
+          </div>`).join('') + `</div>`;
+    } else {
+      recentEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🏠</div><h3>هنوز آگهی‌ای ثبت نشده</h3></div>`;
+    }
+  }
+
+  // ---- All Properties ----
+  async function loadAllProperties(page = 1) {
+    propsPage = page;
+    const el = document.getElementById('all-properties-list');
+    el.innerHTML = `<div class="loading-overlay"><div class="spinner"></div></div>`;
+    const { data } = await apiFetch(`/properties?page=${page}&limit=10`);
+    if (!data.success) return;
+
+    if (data.properties.length === 0) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">🏠</div><h3>آگهی‌ای یافت نشد</h3></div>`;
+      return;
+    }
+
+    el.innerHTML = `<div class="table-wrapper"><table>
+      <thead><tr><th>عنوان</th><th>نوع</th><th>منطقه</th><th>قیمت</th><th>وضعیت</th><th>عملیات</th></tr></thead>
+      <tbody>` +
+      data.properties.map(p => `
+        <tr>
+          <td><a href="/pages/property-detail.html?id=${p.id}" style="color:var(--primary);font-weight:600">${p.title}</a></td>
+          <td><span class="badge badge-primary">${propertyTypeLabel(p.property_type)}</span></td>
+          <td>${p.location_name || '---'}</td>
+          <td style="font-weight:700;color:var(--primary)">${formatPrice(p.total_price)}</td>
+          <td><span class="badge ${p.active ? 'badge-success' : 'badge-danger'}">${p.active ? 'فعال' : 'غیرفعال'}</span></td>
+          <td>
+            <div style="display:flex;gap:0.35rem">
+              <a href="/pages/edit-listing.html?id=${p.id}" class="btn btn-sm btn-outline">✏️</a>
+              <button class="btn btn-sm ${p.active ? 'btn-warning' : 'btn-success'}" onclick="togglePropStatus(${p.id},${p.active ? 0 : 1})" style="${p.active ? 'background:var(--warning);color:white' : ''}">
+                ${p.active ? '🚫 غیرفعال' : '✅ فعال'}
+              </button>
+            </div>
+          </td>
+        </tr>`).join('') +
+      `</tbody></table></div>`;
+
+    buildPagination(document.getElementById('props-pagination'), data.pagination, loadAllProperties.toString());
+  }
+
+  async function togglePropStatus(id, active) {
+    const { ok, data } = await apiFetch(`/admin/properties/${id}/status`, {
+      method: 'PUT', body: JSON.stringify({ active })
+    });
+    if (ok && data.success) { showToast(data.message, 'success'); loadAllProperties(propsPage); }
+    else showToast(data.message || 'خطا', 'error');
+  }
+
+  // ---- Users ----
+  async function loadUsers() {
+    const { data } = await apiFetch('/admin/users');
+    const tbody = document.getElementById('users-tbody');
+    if (!data.success) { tbody.innerHTML = `<tr><td colspan="6">خطا</td></tr>`; return; }
+
+    tbody.innerHTML = data.users.map(u => `
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:0.5rem"><span style="font-size:1.2rem">${avatarEmoji(u.avatar)}</span><span style="font-weight:600">${u.username}</span></div></td>
+        <td>${u.full_name}</td>
+        <td><span class="badge ${u.role === 'manager' ? 'badge-danger' : u.role === 'agent' ? 'badge-warning' : 'badge-secondary'}">${roleLabel(u.role)}</span></td>
+        <td><span class="badge ${u.active ? 'badge-success' : 'badge-danger'}">${u.active ? 'فعال' : 'غیرفعال'}</span></td>
+        <td style="font-size:0.82rem">${formatDate(u.created_at)}</td>
+        <td>
+          <div style="display:flex;gap:0.35rem">
+            <button class="btn btn-sm btn-outline" onclick="openRoleModal(${u.id},'${u.username}','${u.role}')">نقش</button>
+            <button class="btn btn-sm ${u.active ? 'btn-danger' : 'btn-success'}" onclick="toggleUserStatus(${u.id},${u.active ? 0 : 1})">
+              ${u.active ? '🚫' : '✅'}
+            </button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function openRoleModal(id, username, currentRole) {
+    selectedUserId = id;
+    document.getElementById('role-modal-username').textContent = username;
+    document.getElementById('role-select').value = currentRole;
+    openModal('role-modal');
+  }
+
+  async function saveRole() {
+    const role = document.getElementById('role-select').value;
+    const { ok, data } = await apiFetch(`/admin/users/${selectedUserId}/role`, {
+      method: 'PUT', body: JSON.stringify({ role })
+    });
+    if (ok && data.success) {
+      closeModal('role-modal');
+      showToast('نقش کاربر تغییر کرد ✅', 'success');
+      loadUsers();
+    } else showToast(data.message || 'خطا', 'error');
+  }
+
+  async function toggleUserStatus(id, active) {
+    const { ok, data } = await apiFetch(`/admin/users/${id}/role`, {
+      method: 'PUT', body: JSON.stringify({ active })
+    });
+    if (ok && data.success) { showToast(data.message, 'success'); loadUsers(); }
+    else showToast(data.message || 'خطا', 'error');
+  }
+
+  // ---- Registrations ----
+  async function loadRegistrations() {
+    const { data } = await apiFetch('/admin/registrations');
+    const tbody = document.getElementById('regs-tbody');
+    if (!data.success) { tbody.innerHTML = `<tr><td colspan="5">خطا</td></tr>`; return; }
+    tbody.innerHTML = data.logs.map((r, i) => `
+      <tr>
+        <td>${(i + 1).toLocaleString('fa-IR')}</td>
+        <td style="font-weight:600">${r.username}</td>
+        <td>${r.full_name}</td>
+        <td><span class="badge ${r.role === 'agent' ? 'badge-warning' : 'badge-secondary'}">${roleLabel(r.role)}</span></td>
+        <td style="font-size:0.82rem">${formatDate(r.created_at)}</td>
+      </tr>`).join('');
+  }
+
+  // ---- Logs ----
+  async function loadLogs(page = 1) {
+    logsPage = page;
+    const { data } = await apiFetch(`/admin/logs?page=${page}&limit=20`);
+    const tbody = document.getElementById('logs-tbody');
+    if (!data.success) { tbody.innerHTML = `<tr><td colspan="4">خطا</td></tr>`; return; }
+
+    const actionLabels = {
+      register: '📝 ثبت‌نام', login: '🔑 ورود', create_property: '➕ ثبت آگهی',
+      update_property: '✏️ ویرایش آگهی', delete_property: '🗑️ حذف آگهی',
+      update_profile: '👤 ویرایش پروفایل', change_role: '🔄 تغییر نقش',
+      activate_property: '✅ فعال‌سازی آگهی', deactivate_property: '🚫 غیرفعال‌سازی آگهی',
+      activate_user: '✅ فعال‌سازی کاربر', deactivate_user: '🚫 غیرفعال‌سازی کاربر',
+    };
+
+    tbody.innerHTML = data.logs.map(l => `
+      <tr>
+        <td style="font-weight:600">${l.username || 'سیستم'}</td>
+        <td>${actionLabels[l.action] || l.action}</td>
+        <td style="font-size:0.82rem;color:var(--text-muted)">${l.details || '---'}</td>
+        <td style="font-size:0.82rem">${formatDate(l.created_at)}</td>
+      </tr>`).join('');
+
+    buildPagination(document.getElementById('logs-pagination'), data.pagination, loadLogs.toString());
+  }
+
+  // ---- Locations ----
+  async function loadLocationsTab() {
+    const { data } = await apiFetch('/locations');
+    const tbody = document.getElementById('locations-tbody');
+    if (!data.success) return;
+    tbody.innerHTML = data.locations.map((l, i) => `
+      <tr>
+        <td>${(i + 1).toLocaleString('fa-IR')}</td>
+        <td style="font-weight:600">${l.name}</td>
+        <td><span class="badge ${l.type === 'city' ? 'badge-primary' : 'badge-secondary'}">${l.type === 'city' ? 'شهر' : 'روستا'}</span></td>
+      </tr>`).join('');
+  }
+
+  async function addLocation() {
+    const name = document.getElementById('loc-name').value.trim();
+    const type = document.getElementById('loc-type').value;
+    const alertEl = document.getElementById('loc-alert');
+    if (!name) { alertEl.innerHTML = `<div class="alert alert-warning">⚠️ نام منطقه الزامی است</div>`; return; }
+
+    const { ok, data } = await apiFetch('/admin/locations', {
+      method: 'POST', body: JSON.stringify({ name, type })
+    });
+
+    if (ok && data.success) {
+      closeModal('add-location-modal');
+      document.getElementById('loc-name').value = '';
+      showToast('منطقه اضافه شد ✅', 'success');
+      loadLocationsTab();
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-danger">❌ ${data.message || 'خطا'}</div>`;
+    }
+  }
+
+  // ---- Profile ----
+  async function loadProfile() {
+    const { data } = await apiFetch('/auth/profile');
+    if (!data.success) return;
+    const u = data.user;
+    document.getElementById('p-username').value = u.username || '';
+    document.getElementById('p-fullname').value = u.full_name || '';
+    document.getElementById('p-phone').value = u.phone || '';
+    document.getElementById('p-email').value = u.email || '';
+    document.getElementById('avatar').value = u.avatar || 1;
+    selectAvatar(u.avatar || 1);
+    document.getElementById('sidebar-name').textContent = u.full_name;
+    document.getElementById('sidebar-avatar').textContent = avatarEmoji(u.avatar);
+  }
+
+  async function saveProfile() {
+    const alertEl = document.getElementById('profile-alert');
+    const full_name = document.getElementById('p-fullname').value.trim();
+    if (!full_name) { alertEl.innerHTML = `<div class="alert alert-warning">⚠️ نام کامل الزامی است</div>`; return; }
+
+    const { ok, data } = await apiFetch('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify({
+        full_name,
+        phone: document.getElementById('p-phone').value.trim() || null,
+        email: document.getElementById('p-email').value.trim() || null,
+        avatar: parseInt(document.getElementById('avatar').value),
+        current_password: document.getElementById('p-current-pw').value || undefined,
+        new_password: document.getElementById('p-new-pw').value || undefined,
+      })
+    });
+
+    if (ok && data.success) {
+      setAuth(getToken(), data.user);
+      alertEl.innerHTML = `<div class="alert alert-success">✅ پروفایل ذخیره شد</div>`;
+      document.getElementById('sidebar-name').textContent = data.user.full_name;
+      document.getElementById('sidebar-avatar').textContent = avatarEmoji(data.user.avatar);
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-danger">❌ ${data.message || 'خطا'}</div>`;
+    }
+  }
+
+  // Init
+  loadStats();
+  setTimeout(loadManagerCharts, 600);
+</script>
+<script src="/js/realtime.js"></script>
+</body>
+</html>

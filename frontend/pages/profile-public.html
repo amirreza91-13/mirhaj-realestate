@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>پروفایل کاربر - املاک میرحاج</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animations.css">
+  <style>
+    .profile-hero {
+      background: linear-gradient(135deg, #0D1B2A 0%, #1B4F72 100%);
+      padding: 3rem 0 5rem;
+      position: relative;
+    }
+    .profile-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-top: -3rem;
+      position: relative;
+      z-index: 2;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .profile-avatar-big {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      border: 4px solid white;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem;
+      flex-shrink: 0;
+      box-shadow: var(--shadow);
+    }
+    .profile-info { flex: 1; min-width: 200px; }
+    .profile-name { font-size: 1.5rem; font-weight: 900; margin-bottom: 0.3rem; }
+    .profile-role { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.85rem; border-radius: 20px; font-size: 0.82rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .profile-role.manager { background: #FDEDEC; color: var(--danger); }
+    .profile-role.agent   { background: #EBF5FB; color: var(--primary); }
+    .profile-role.user    { background: var(--bg); color: var(--text-secondary); }
+    .profile-stats { display: flex; gap: 2rem; flex-wrap: wrap; }
+    .profile-stat { text-align: center; }
+    .profile-stat strong { display: block; font-size: 1.6rem; font-weight: 900; color: var(--primary); }
+    .profile-stat span { font-size: 0.78rem; color: var(--text-muted); }
+    .profile-actions { display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0; }
+    .star-rating { display: flex; gap: 0.2rem; }
+    .star { font-size: 1.2rem; cursor: pointer; transition: transform 0.1s; }
+    .star:hover { transform: scale(1.2); }
+    .review-card { background: var(--bg); border-radius: var(--radius); padding: 1rem; margin-bottom: 0.75rem; }
+    .review-stars { color: #F39C12; font-size: 0.9rem; }
+    @media (max-width: 600px) {
+      .profile-card { flex-direction: column; align-items: center; text-align: center; }
+      .profile-stats { justify-content: center; }
+      .profile-actions { width: 100%; }
+      .profile-actions .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/pages/index.html" class="navbar-brand"><div class="brand-icon">🏠</div><span>املاک میرحاج</span></a>
+    <button class="hamburger" id="hamburger">☰</button>
+    <ul class="navbar-nav" id="navbar-nav">
+      <li><a href="/pages/index.html">🏠 خانه</a></li>
+      <li><a href="/pages/properties.html">🔍 آگهی‌ها</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div id="nav-auth" style="display:flex;gap:0.4rem">
+        <a href="/pages/login.html" class="btn btn-ghost btn-sm">ورود</a>
+        <a href="/pages/register.html" class="btn btn-primary btn-sm">ثبت‌نام</a>
+      </div>
+      <div id="nav-user" class="hidden" style="display:flex;align-items:center;gap:0.5rem">
+        <a href="#" id="nav-dashboard" class="btn btn-outline btn-sm">داشبورد</a>
+        <div style="position:relative">
+          <button onclick="document.getElementById('user-dropdown').classList.toggle('hidden')"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-full);padding:0.35rem 0.85rem;display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;font-weight:600">
+            <span id="nav-username"></span> ▾
+          </button>
+          <div id="user-dropdown" class="hidden"
+            style="position:absolute;top:115%;left:0;background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);min-width:160px;z-index:999;padding:0.4rem 0">
+            <a href="#" onclick="logout()" style="display:block;padding:0.65rem 1rem;font-size:0.88rem;color:var(--danger)">🚪 خروج</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Profile Hero -->
+<div class="profile-hero">
+  <div class="container">
+    <div class="breadcrumb" style="color:rgba(255,255,255,0.6);margin-bottom:1rem">
+      <a href="/pages/index.html" style="color:rgba(255,255,255,0.6)">خانه</a>
+      <span id="breadcrumb-name" style="color:white">پروفایل</span>
+    </div>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:3rem">
+
+  <!-- Loading -->
+  <div id="loading" class="loading-overlay"><div class="spinner"></div></div>
+
+  <div id="profile-content" style="display:none">
+
+    <!-- Profile Card -->
+    <div class="profile-card animate-fade-up">
+      <div class="profile-avatar-big" id="p-avatar">👤</div>
+      <div class="profile-info">
+        <div class="profile-name" id="p-name"></div>
+        <div class="profile-role" id="p-role"></div>
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem" id="p-rating-row"></div>
+        <div class="profile-stats">
+          <div class="profile-stat"><strong id="p-prop-count">۰</strong><span>آگهی فعال</span></div>
+          <div class="profile-stat" id="p-review-stat" style="display:none"><strong id="p-review-count">۰</strong><span>نظر</span></div>
+          <div class="profile-stat"><strong id="p-joined"></strong><span>عضویت</span></div>
+        </div>
+        <div style="margin-top:0.75rem" id="p-contact"></div>
+      </div>
+      <div class="profile-actions" id="p-actions"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin:2rem 0 1.5rem">
+      <button class="tab-btn active" onclick="showTab('listings',this)" style="padding:0.75rem 1.5rem;border:none;background:none;font-weight:600;font-size:0.9rem;cursor:pointer;border-bottom:2.5px solid var(--primary);margin-bottom:-2px;color:var(--primary)">🏠 آگهی‌ها</button>
+      <button class="tab-btn" onclick="showTab('reviews',this)" id="reviews-tab-btn" style="padding:0.75rem 1.5rem;border:none;background:none;font-weight:600;font-size:0.9rem;cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;color:var(--text-secondary)">⭐ نظرات</button>
+    </div>
+
+    <!-- Listings Tab -->
+    <div id="tab-listings">
+      <div class="property-grid" id="user-listings">
+        <div class="loading-overlay" style="grid-column:1/-1"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Reviews Tab -->
+    <div id="tab-reviews" style="display:none">
+      <div id="reviews-list">
+        <div class="loading-overlay"><div class="spinner"></div></div>
+      </div>
+      <!-- Add Review (only for logged-in users who are not the profile owner) -->
+      <div id="add-review-section" style="display:none" class="card mt-3">
+        <div class="card-header"><h3>⭐ ثبت نظر و امتیاز</h3></div>
+        <div class="card-body">
+          <div id="review-alert"></div>
+          <div class="form-group">
+            <label class="form-label">امتیاز شما</label>
+            <div class="star-rating" id="star-rating">
+              <span class="star" data-val="1" onclick="setRating(1)">☆</span>
+              <span class="star" data-val="2" onclick="setRating(2)">☆</span>
+              <span class="star" data-val="3" onclick="setRating(3)">☆</span>
+              <span class="star" data-val="4" onclick="setRating(4)">☆</span>
+              <span class="star" data-val="5" onclick="setRating(5)">☆</span>
+            </div>
+            <input type="hidden" id="rating-val" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">نظر شما</label>
+            <textarea class="form-control" id="review-comment" rows="3" placeholder="تجربه کار با این مشاور را بنویسید..."></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="submitReview()">ثبت نظر</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer" style="background:#0A0F18">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding:1.5rem 0">
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <div style="width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem">🏠</div>
+        <span style="color:white;font-weight:700">املاک میرحاج</span>
+      </div>
+      <span style="color:rgba(255,255,255,0.45);font-size:0.82rem">محمدآباد جرقویه | ۰۹۱۳۲۰۸۹۹۷۹</span>
+      <a href="/pages/index.html" style="color:rgba(255,255,255,0.45);font-size:0.82rem">بازگشت به خانه ›</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get('id');
+  if (!userId) location.href = '/pages/index.html';
+
+  const AVATARS = ['🏠','🏡','🏢','🏗️','🔑'];
+  const ROLE_LABELS = { manager:'مدیر کل', agent:'مشاور', user:'کاربر' };
+  const ROLE_CLASSES = { manager:'manager', agent:'agent', user:'user' };
+  let selectedRating = 0;
+  let profileUser = null;
+
+  function showTab(tab, btn) {
+    document.getElementById('tab-listings').style.display = tab==='listings' ? 'block' : 'none';
+    document.getElementById('tab-reviews').style.display  = tab==='reviews'  ? 'block' : 'none';
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.style.borderBottomColor = 'transparent';
+      b.style.color = 'var(--text-secondary)';
+    });
+    btn.style.borderBottomColor = 'var(--primary)';
+    btn.style.color = 'var(--primary)';
+    if (tab === 'reviews') loadReviews();
+  }
+
+  function setRating(val) {
+    selectedRating = val;
+    document.getElementById('rating-val').value = val;
+    document.querySelectorAll('.star').forEach((s, i) => {
+      s.textContent = i < val ? '⭐' : '☆';
+    });
+  }
+
+  async function loadProfile() {
+    const { data: ud } = await apiFetch(`/users/${userId}`);
+    document.getElementById('loading').style.display = 'none';
+    if (!ud?.success) { location.href = '/pages/404.html'; return; }
+
+    profileUser = ud.user;
+    const u = profileUser;
+
+    document.title = `${u.full_name} - املاک میرحاج`;
+    document.getElementById('breadcrumb-name').textContent = u.full_name;
+    document.getElementById('p-avatar').textContent = AVATARS[(u.avatar||1)-1];
+    document.getElementById('p-name').textContent = u.full_name;
+
+    const roleEl = document.getElementById('p-role');
+    roleEl.textContent = ROLE_LABELS[u.role] || u.role;
+    roleEl.className = `profile-role ${ROLE_CLASSES[u.role]||'user'}`;
+
+    document.getElementById('p-joined').textContent = new Date(u.created_at).toLocaleDateString('fa-IR');
+
+    // Contact
+    if (u.phone) {
+      document.getElementById('p-contact').innerHTML = `
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+          <a href="tel:${u.phone}" class="btn btn-success btn-sm">📞 ${u.phone}</a>
+          <a href="https://wa.me/98${u.phone.replace(/^0/,'')}" target="_blank" class="btn btn-sm" style="background:#25D366;color:white">💬 واتساپ</a>
+        </div>`;
+    }
+
+    // Load listings
+    loadUserListings(userId);
+
+    // Actions for logged-in users
+    const me = getUser();
+    const actions = [];
+    if (me && me.id !== parseInt(userId)) {
+      actions.push(`<a href="/pages/messages.html?to=${userId}" class="btn btn-primary">💬 ارسال پیام</a>`);
+    }
+    if (me && me.id === parseInt(userId)) {
+      actions.push(`<a href="/pages/dashboard-user.html" class="btn btn-outline">✏️ ویرایش پروفایل</a>`);
+    }
+    document.getElementById('p-actions').innerHTML = actions.join('');
+
+    // Show reviews tab for agents/managers
+    if (['agent','manager'].includes(u.role)) {
+      document.getElementById('reviews-tab-btn').style.display = '';
+      document.getElementById('p-review-stat').style.display = '';
+      loadRatingPreview(userId);
+      if (me && me.id !== parseInt(userId)) {
+        document.getElementById('add-review-section').style.display = 'block';
+      }
+    }
+
+    document.getElementById('profile-content').style.display = 'block';
+  }
+
+  async function loadRatingPreview(uid) {
+    const { data } = await apiFetch(`/reviews/agent/${uid}`);
+    if (!data.success) return;
+    const avg = data.stats?.avg_rating;
+    const total = data.stats?.total || 0;
+    document.getElementById('p-review-count').textContent = total.toLocaleString('fa-IR');
+    if (avg) {
+      const stars = '⭐'.repeat(Math.round(avg)) + '☆'.repeat(5-Math.round(avg));
+      document.getElementById('p-rating-row').innerHTML = `
+        <span style="font-size:1rem">${stars}</span>
+        <span style="font-weight:700;color:var(--primary)">${parseFloat(avg).toFixed(1)}</span>
+        <span style="font-size:0.8rem;color:var(--text-muted)">(${total} نظر)</span>`;
+    }
+  }
+
+  async function loadUserListings(uid) {
+    const { data } = await apiFetch(`/properties?owner_id=${uid}&limit=12`);
+    const grid = document.getElementById('user-listings');
+    if (!data.success || !data.properties.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-icon">🏠</div><h3>هنوز آگهی‌ای ثبت نشده</h3></div>`;
+      document.getElementById('p-prop-count').textContent = '۰';
+      return;
+    }
+    document.getElementById('p-prop-count').textContent = data.pagination.total.toLocaleString('fa-IR');
+    grid.innerHTML = data.properties.map(buildPropertyCard).join('');
+  }
+
+  async function loadReviews() {
+    const { data } = await apiFetch(`/reviews/agent/${userId}`);
+    const list = document.getElementById('reviews-list');
+    if (!data.success || !data.reviews.length) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">⭐</div><h3>هنوز نظری ثبت نشده</h3></div>`;
+      return;
+    }
+    list.innerHTML = data.reviews.map(r => `
+      <div class="review-card animate-fade-up">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem">
+          <div style="font-size:1.5rem">${AVATARS[(r.reviewer_avatar||1)-1]}</div>
+          <div>
+            <div style="font-weight:700;font-size:0.9rem">${r.reviewer_name}</div>
+            <div class="review-stars">${'⭐'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+          </div>
+          <div style="margin-right:auto;font-size:0.75rem;color:var(--text-muted)">${new Date(r.created_at).toLocaleDateString('fa-IR')}</div>
+        </div>
+        ${r.comment ? `<p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;margin:0">${r.comment}</p>` : ''}
+      </div>`).join('');
+  }
+
+  async function submitReview() {
+    const alertEl = document.getElementById('review-alert');
+    const rating  = parseInt(document.getElementById('rating-val').value);
+    const comment = document.getElementById('review-comment').value.trim();
+    alertEl.innerHTML = '';
+    if (!rating) { alertEl.innerHTML = `<div class="alert alert-warning">⚠️ امتیاز را انتخاب کنید</div>`; return; }
+    if (!isLoggedIn()) { location.href = '/pages/login.html'; return; }
+
+    const { ok, data } = await apiFetch('/reviews', {
+      method: 'POST',
+      body: JSON.stringify({ agent_id: parseInt(userId), rating, comment: comment || null })
+    });
+
+    if (ok && data.success) {
+      alertEl.innerHTML = `<div class="alert alert-success">✅ نظر شما ثبت شد</div>`;
+      loadReviews();
+      loadRatingPreview(userId);
+    } else {
+      alertEl.innerHTML = `<div class="alert alert-danger">❌ ${data.message||'خطا'}</div>`;
+    }
+  }
+
+  loadProfile();
+</script>
+</body>
+</html>
