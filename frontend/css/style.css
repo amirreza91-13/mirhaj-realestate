@@ -47,7 +47,7 @@
 /* ---- Reset & Base ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
 
 body {
   font-family: var(--font);
@@ -56,6 +56,8 @@ body {
   direction: rtl;
   line-height: 1.7;
   min-height: 100vh;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -935,6 +937,12 @@ tbody tr:hover { background: #fafbfc; }
     border-bottom: 1px solid var(--border);
     box-shadow: var(--shadow);
     z-index: 999;
+    max-height: calc(100vh - var(--nav-height));
+    overflow-y: auto;
+  }
+  .navbar-nav.open a {
+    width: 100%;
+    padding: 0.75rem 0.85rem;
   }
   .footer-grid { grid-template-columns: 1fr; }
   .property-grid { grid-template-columns: 1fr; }

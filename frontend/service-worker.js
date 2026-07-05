@@ -2,9 +2,9 @@
 // املاک میرحاج - Service Worker
 // ========================================
 
-const CACHE_NAME = 'mirhaj-v1';
-const STATIC_CACHE = 'mirhaj-static-v1';
-const API_CACHE = 'mirhaj-api-v1';
+const CACHE_NAME = 'mirhaj-v2';
+const STATIC_CACHE = 'mirhaj-static-v2';
+const API_CACHE = 'mirhaj-api-v2';
 
 // فایل‌های استاتیک که باید کش بشن
 const STATIC_FILES = [
@@ -12,6 +12,11 @@ const STATIC_FILES = [
   '/pages/properties.html',
   '/pages/login.html',
   '/pages/register.html',
+  '/pages/ai-assistant.html',
+  '/pages/messages.html',
+  '/pages/compare.html',
+  '/pages/bookmarks.html',
+  '/pages/map-view.html',
   '/pages/404.html',
   '/css/style.css',
   '/css/animations.css',
@@ -111,16 +116,32 @@ async function cacheFirst(request) {
 }
 
 // Stale While Revalidate: HTML/CSS/JS
+// اصلاح شده: دیگه با اولین خطای موقتی شبکه، صفحه ۴۰۴ نشون داده نمیشه
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(STATIC_CACHE);
   const cached = await cache.match(request);
 
-  const fetchPromise = fetch(request).then(response => {
+  // اگه نسخه‌ی کش‌شده داریم، همون رو فوری برگردون و در پس‌زمینه به‌روزرسانی کن
+  if (cached) {
+    fetch(request).then(response => {
+      if (response.ok) cache.put(request, response.clone());
+    }).catch(() => {});
+    return cached;
+  }
+
+  // اگه کش نداریم، منتظر شبکه بمون (نه یه catch سریع که بره سراغ ۴۰۴)
+  try {
+    const response = await fetch(request);
     if (response.ok) cache.put(request, response.clone());
     return response;
-  }).catch(() => null);
-
-  return cached || await fetchPromise || caches.match('/pages/404.html');
+  } catch (err) {
+    // فقط اگه واقعاً درخواست ناوبری صفحه بود (نه فایل CSS/JS)، صفحه ۴۰۴/آفلاین رو نشون بده
+    if (request.mode === 'navigate') {
+      const fallback = await caches.match('/pages/404.html');
+      if (fallback) return fallback;
+    }
+    return new Response('', { status: 503, statusText: 'Network error, please retry' });
+  }
 }
 
 // ---- Background Sync (پیام‌های ارسال نشده) ----
@@ -131,7 +152,6 @@ self.addEventListener('sync', event => {
 });
 
 async function syncPendingMessages() {
-  // ارسال مجدد پیام‌های ذخیره شده آفلاین
   console.log('[SW] Syncing pending messages...');
 }
 
