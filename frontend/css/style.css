@@ -427,10 +427,25 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   footer [style*="grid-template-columns:2fr"],
   footer [style*="grid-template-columns: 2fr"] {
     grid-template-columns: 1fr !important;
+  }
+
+  /* Navbar action buttons (dashboard, create-listing, dark mode toggle...)
+     were overflowing off-screen next to the hamburger. Wrap them onto
+     their own row instead of letting them get clipped. */
+  .navbar .container {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+  .navbar-actions {
+    flex-basis: 100%;
+    order: 3;
+    justify-content: flex-end;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
