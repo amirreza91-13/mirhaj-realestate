@@ -410,6 +410,30 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 /* ---- Tables ---- */
 .table-wrapper { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
 
+/* ---- Mobile fixes: navbar logo image & footer grid ---- */
+@media (max-width: 768px) {
+  /* Some pages use an <img> logo instead of the emoji brand-icon; on mobile
+     this image was causing overlap with the site name. Force the reliable
+     emoji icon instead, consistently across every page. */
+  .navbar-brand img { display: none !important; }
+  .navbar-brand .brand-icon { display: flex !important; }
+
+  /* Several pages hard-code a 4-column footer grid via inline styles,
+     which never adapts on narrow screens and gets clipped by overflow-x:hidden.
+     Force it down to fewer columns on mobile regardless of inline styles. */
+  footer [style*="grid-template-columns:2fr"],
+  footer [style*="grid-template-columns: 2fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  footer [style*="grid-template-columns:2fr"],
+  footer [style*="grid-template-columns: 2fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 thead { background: var(--bg); }
 th {
