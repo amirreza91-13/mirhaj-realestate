@@ -336,7 +336,8 @@
     const maxP   = parseInt(document.getElementById('slider-max-price').value);
     const minA   = parseInt(document.getElementById('slider-min-area').value);
     const maxA   = parseInt(document.getElementById('slider-max-area').value);
-    if (selectedTypes.length) currentFilters.property_type = selectedTypes[selectedTypes.length-1];
+    const sort   = document.getElementById('sort-order').value;
+    if (selectedTypes.length) currentFilters.property_type = selectedTypes.join(',');
     if (search) currentFilters.search = search;
     if (loc)    currentFilters.location_id = loc;
     if (selectedRooms) currentFilters.rooms = selectedRooms;
@@ -344,6 +345,7 @@
     if (maxP<20000000000) currentFilters.max_price = maxP;
     if (minA>0) currentFilters.min_area = minA;
     if (maxA<2000) currentFilters.max_area = maxA;
+    if (sort && sort !== 'newest') currentFilters.sort = sort;
     loadProperties(1);
   }
 

@@ -11,13 +11,17 @@ function getProperties(req, res) {
     const {
       property_type, min_price, max_price,
       min_area, max_area, rooms,
-      search, location_id, page = 1, limit = 12
+      search, location_id, sort, page = 1, limit = 12
     } = req.query;
 
     let conditions = ['p.active = 1'];
 
     if (property_type && property_type.trim()) {
-      conditions.push(`p.property_type = '${property_type.replace(/'/g,"''")}'`);
+      const types = property_type.split(',').map(t => t.trim()).filter(Boolean);
+      if (types.length) {
+        const escaped = types.map(t => `'${t.replace(/'/g,"''")}'`).join(',');
+        conditions.push(`p.property_type IN (${escaped})`);
+      }
     }
     if (location_id && !isNaN(parseInt(location_id)) && parseInt(location_id) > 0) {
       conditions.push(`p.location_id = ${parseInt(location_id)}`);
@@ -48,6 +52,11 @@ function getProperties(req, res) {
     const countResult = all(`SELECT COUNT(*) as total FROM properties p ${where}`);
     const total = countResult[0]?.total || 0;
 
+    let orderBy = 'p.created_at DESC';
+    if (sort === 'oldest') orderBy = 'p.created_at ASC';
+    else if (sort === 'price_asc') orderBy = 'p.total_price ASC';
+    else if (sort === 'price_desc') orderBy = 'p.total_price DESC';
+
     const properties = all(`
       SELECT p.*, l.name as location_name, u.full_name as owner_name,
              (SELECT filepath FROM property_images WHERE property_id = p.id AND is_primary = 1 LIMIT 1) as primary_image
@@ -55,7 +64,7 @@ function getProperties(req, res) {
       LEFT JOIN locations l ON p.location_id = l.id
       LEFT JOIN users u ON p.owner_id = u.id
       ${where}
-      ORDER BY p.created_at DESC
+      ORDER BY ${orderBy}
       LIMIT ${parseInt(limit)} OFFSET ${offset}
     `);
 
