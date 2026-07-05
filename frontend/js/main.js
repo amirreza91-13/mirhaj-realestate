@@ -2,7 +2,7 @@
 // املاک میرحاج - توابع مشترک
 // ========================================
 
-const API = 'http://localhost:3000/api';
+const API = window.location.origin + '/api';
 
 // ---- Auth Helpers ----
 function getToken() { return localStorage.getItem('mirhaj_token'); }

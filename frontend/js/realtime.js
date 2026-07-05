@@ -9,7 +9,7 @@ let isConnected = false;
 function initRealtime() {
   if (typeof io === 'undefined') return;
 
-  socket = io('http://localhost:3000', {
+ socket = io(window.location.origin, {
     transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionDelay: 2000,
