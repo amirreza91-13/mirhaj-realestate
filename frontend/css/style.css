@@ -436,12 +436,20 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Navbar redesign for mobile: hamburger anchored to the far edge,
      action buttons (dashboard, create-listing, dark mode toggle...) wrap
      onto their own row instead of overflowing off-screen. */
+  .navbar {
+    height: auto;
+    padding: 0.65rem 0;
+  }
   .navbar .container {
     flex-wrap: wrap;
-    row-gap: 0.5rem;
+    row-gap: 0.65rem;
   }
   .navbar-brand {
     order: 1;
+    font-size: 1.05rem;
+  }
+  .navbar-brand .brand-icon {
+    width: 34px; height: 34px; font-size: 1rem;
   }
   .hamburger {
     order: 2;
@@ -451,14 +459,14 @@ textarea.form-control { resize: vertical; min-height: 100px; }
     order: 3;
     flex-basis: 100%;
     width: 100%;
-    justify-content: flex-start;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 0.25rem;
+    flex-wrap: wrap; /* wrap to a new row instead of clipping/scrolling,
+                         which was cutting off dropdown menus like the
+                         user role button */
+    row-gap: 0.5rem;
   }
   .navbar-actions #nav-auth,
   .navbar-actions #nav-user {
-    flex-shrink: 0;
+    flex-wrap: wrap;
   }
 }
 
