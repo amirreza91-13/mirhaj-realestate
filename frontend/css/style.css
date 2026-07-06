@@ -433,19 +433,32 @@ textarea.form-control { resize: vertical; min-height: 100px; }
     grid-template-columns: 1fr !important;
   }
 
-  /* Navbar action buttons (dashboard, create-listing, dark mode toggle...)
-     were overflowing off-screen next to the hamburger. Wrap them onto
-     their own row instead of letting them get clipped. */
+  /* Navbar redesign for mobile: hamburger anchored to the far edge,
+     action buttons (dashboard, create-listing, dark mode toggle...) wrap
+     onto their own row instead of overflowing off-screen. */
   .navbar .container {
     flex-wrap: wrap;
     row-gap: 0.5rem;
   }
+  .navbar-brand {
+    order: 1;
+  }
+  .hamburger {
+    order: 2;
+    margin-right: auto; /* pushes hamburger to the far edge, away from the brand */
+  }
   .navbar-actions {
-    flex-basis: 100%;
     order: 3;
-    justify-content: flex-end;
+    flex-basis: 100%;
+    width: 100%;
+    justify-content: flex-start;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.25rem;
+  }
+  .navbar-actions #nav-auth,
+  .navbar-actions #nav-user {
+    flex-shrink: 0;
   }
 }
 

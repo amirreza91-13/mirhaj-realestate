@@ -2,9 +2,9 @@
 // املاک میرحاج - Service Worker
 // ========================================
 
-const CACHE_NAME = 'mirhaj-v2';
-const STATIC_CACHE = 'mirhaj-static-v2';
-const API_CACHE = 'mirhaj-api-v2';
+const CACHE_NAME = 'mirhaj-v3';
+const STATIC_CACHE = 'mirhaj-static-v3';
+const API_CACHE = 'mirhaj-api-v3';
 
 // فایل‌های استاتیک که باید کش بشن
 const STATIC_FILES = [
@@ -74,7 +74,14 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Static files - Stale While Revalidate
+  // CSS/JS - Network First (so future style/script fixes reach everyone right away,
+  // instead of possibly showing an old cached version for a while)
+  if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
+    event.respondWith(networkFirst(event.request));
+    return;
+  }
+
+  // Static HTML pages - Stale While Revalidate
   event.respondWith(staleWhileRevalidate(event.request));
 });
 
