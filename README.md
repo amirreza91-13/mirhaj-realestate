@@ -1,86 +1,149 @@
-@'
-<div align="center">
+ <div align="center">
 
-# 🏠 Mirhaj Real Estate
+# Mirhaj Real Estate
 
-### A modern full-stack real-estate platform for Jarquyeh, Isfahan 🇮🇷
+### A Web Application for Real Estate Workflows
 
-Built with **Node.js, Express, JavaScript, HTML & CSS**  
-with real-time communication, authentication, property management and PWA capabilities.
+A real-estate web application project focused on property-related workflows, application-server functionality, and user-facing features.
 
-<br>
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge\&logo=nodedotjs\&logoColor=white)
+![Express](https://img.shields.io/badge/Express-0B1220?style=for-the-badge\&logo=express\&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge\&logo=javascript\&logoColor=0B1220)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge\&logo=socketdotio\&logoColor=white)
+![SQL](https://img.shields.io/badge/sql.js-2563EB?style=for-the-badge)
 
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express.js-Backend-000000?logo=express&logoColor=white)](https://expressjs.com/)
-[![Socket.IO](https://img.shields.io/badge/Socket.IO-Realtime-010101?logo=socket.io&logoColor=white)](https://socket.io/)
-[![JavaScript](https://img.shields.io/badge/JavaScript-Frontend-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![PWA](https://img.shields.io/badge/PWA-Enabled-5A0FC8?logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
-
-<br>
-
-🏡 **Property Listings** &nbsp; • &nbsp; 🔎 **Search** &nbsp; • &nbsp; 🔐 **Authentication**  
-📱 **PWA** &nbsp; • &nbsp; ⚡ **Real-Time Communication** &nbsp; • &nbsp; 🗄️ **Database**
+[Overview](#overview) · [Technology](#technology-stack) · [Setup](#getting-started) · [Security](#security-considerations)
 
 </div>
 
 ---
 
-## 🌟 About
+## Overview
 
-**Mirhaj Real Estate** is a full-stack real-estate platform created for the **Jarquyeh region of Isfahan, Iran**.
+Mirhaj Real Estate is a web application project designed around real-estate-related workflows. Its codebase combines a Node.js server, web application functionality, database persistence, and components for user access and property-related file handling.
 
-The project combines a lightweight web frontend with a Node.js backend to provide a foundation for publishing, discovering and managing real-estate listings.
+The project is intended to provide a foundation for organizing real-estate information and building a more complete digital property-management experience.
 
-The architecture is designed around a clear separation between:
+## Technology Stack
 
-- 🎨 Frontend
-- ⚙️ Backend
-- 🗄️ Database
-- 🔐 Authentication & middleware
-- ⚡ Real-time communication
-- 📱 Progressive Web App capabilities
+| Technology | Role                                                   |
+| ---------- | ------------------------------------------------------ |
+| Node.js    | JavaScript runtime                                     |
+| Express.js | Server-side application framework                      |
+| JavaScript | Application logic                                      |
+| Socket.IO  | Real-time communication components                     |
+| sql.js     | SQLite-compatible database functionality in JavaScript |
+| JWT        | Token-based authentication components                  |
+| bcrypt     | Password-hashing functionality                         |
+| PWA assets | Progressive web app support                            |
+
+## Architecture at a Glance
+
+```text
+Web Client
+    |
+    v
+Express Application
+    |
+    +---- HTTP Routes
+    |
+    +---- Authentication Components
+    |
+    +---- File Upload Handling
+    |
+    +---- Socket.IO
+    |
+    v
+sql.js Database Persistence
+```
+
+This diagram represents the major components identified in the codebase; it is a conceptual overview, not a claim that every route or workflow has passed runtime testing.
+
+## Project Areas
+
+The repository contains code related to:
+
+* Web application and server-side request handling.
+* Database initialization and persistence.
+* Authentication-related middleware.
+* File upload handling.
+* Socket.IO integration.
+* Progressive web app assets.
+
+Feature availability and end-to-end behavior should be verified against the current implementation before production use.
+
+## Getting Started
+
+### Prerequisites
+
+* Node.js compatible with the dependencies declared by the project.
+* npm.
+* A local copy of this repository.
+
+### Installation
+
+Clone the repository and enter its directory:
+
+```bash
+git clone https://github.com/amirreza91-13/mirhaj-realestate.git
+cd mirhaj-realestate
+npm install
+```
+
+### Configuration and Run
+
+1. Inspect `package.json` to identify the supported scripts.
+2. Review the project's configuration and environment-variable requirements.
+3. Configure secrets using environment variables rather than hardcoding them.
+4. Run the documented development or start script from `package.json`.
+
+For example, if the corresponding script exists:
+
+```bash
+npm run dev
+```
+
+The exact start command and required environment variables must be confirmed against the current repository configuration.
+
+## Security Considerations
+
+Before exposing this application to a public network:
+
+* Replace any default or seeded account credentials.
+* Ensure JWT secrets are unique, strong, and supplied through environment variables.
+* Remove insecure fallback secrets.
+* Validate uploaded files, file sizes, and file types on the server.
+* Review authentication and authorization for every protected route.
+* Restrict database and uploaded-file access.
+* Verify Socket.IO authorization and origin handling.
+* Back up persistent database data securely.
+
+**Production status:** This README does not certify the application as production-ready. Security hardening and runtime validation are required before deployment.
+
+## Development Notes
+
+Recommended next steps include:
+
+* Documenting actual environment variables and supported scripts.
+* Adding setup and smoke tests.
+* Validating database backup and restore behavior.
+* Reviewing error handling and access control.
+* Adding screenshots of verified application screens.
+
+## Contributing
+
+For improvements, start by reviewing the current implementation, identifying reproducible issues, and documenting the expected behavior before submitting changes.
+
+## License
+
+No license is declared here. Check the repository's license status before reusing or redistributing this project.
 
 ---
 
-## ✨ Core Features
+<div align="center">
 
-| Feature | Status |
-|---|:---:|
-| 🏠 Real-estate listings | ✅ |
-| 🔎 Property discovery | ✅ |
-| 🔐 User authentication | ✅ |
-| 👤 User profiles | ✅ |
-| 🖼️ Property images | ✅ |
-| ⚡ Real-time communication | ✅ |
-| 📱 Progressive Web App | ✅ |
-| 🧩 Modular backend architecture | ✅ |
-| 🌐 Responsive web interface | ✅ |
-| 🗄️ Database integration | ✅ |
-| 🔒 JWT-based authentication | ✅ |
-| 📤 File upload handling | ✅ |
+**Built with JavaScript and a focus on practical real-estate workflows.**
 
----
+[Repository](https://github.com/amirreza91-13/mirhaj-realestate)
 
-## 🧠 Architecture
-
-```mermaid
-flowchart TD
-
-    U[👤 User]
-
-    U --> F[🎨 Frontend]
-
-    F --> P[📱 PWA Layer]
-    F --> API[⚡ REST API]
-    F --> WS[🔌 Socket.IO]
-
-    API --> E[🚀 Express Server]
-
-    E --> C[🧩 Controllers]
-    E --> M[🛡️ Middleware]
-    E --> R[🛣️ Routes]
-    E --> UT[🔧 Utilities]
-
-    C --> DB[🗄️ Database]
-
-    WS --> E
+</div>
