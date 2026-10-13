@@ -92,6 +92,8 @@ npm install
 
 ### Run in Development
 
+Before starting the server, complete the [Configuration](#configuration) section below. Startup intentionally fails when `JWT_SECRET` is missing or too short.
+
 Start the development server using the script declared in `package.json`:
 
 ```bash
