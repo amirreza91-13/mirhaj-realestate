@@ -1,39 +1,38 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const UPLOADS_DIR = path.join(__dirname, '../../uploads');
 
-// Make sure uploads directory exists
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
+const allowedTypes = new Map([
+  ['.jpg', new Set(['image/jpeg'])],
+  ['.jpeg', new Set(['image/jpeg'])],
+  ['.png', new Set(['image/png'])],
+  ['.webp', new Set(['image/webp'])]
+]);
+
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, UPLOADS_DIR);
-  },
+  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    const uniqueName = `img_${Date.now()}_${Math.round(Math.random() * 1e6)}${ext}`;
-    cb(null, uniqueName);
+    cb(null, `img_${crypto.randomUUID()}${ext}`);
   }
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
   const ext = path.extname(file.originalname).toLowerCase();
-  if (allowed.includes(ext)) {
-    cb(null, true);
-  } else {
-    cb(new Error('فقط فایل‌های jpg، jpeg، png و webp مجاز هستند'), false);
-  }
+  const mimeTypes = allowedTypes.get(ext);
+  if (mimeTypes && mimeTypes.has(file.mimetype)) return cb(null, true);
+  return cb(new Error('فقط فایل‌های jpg، jpeg، png و webp با نوع MIME متناظر مجاز هستند'), false);
 };
 
-const upload = multer({
+module.exports = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 }
 });
-
-module.exports = upload;
