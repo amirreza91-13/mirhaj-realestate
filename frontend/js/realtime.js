@@ -10,6 +10,7 @@ function initRealtime() {
   if (typeof io === 'undefined') return;
 
  socket = io(window.location.origin, {
+    auth: { token: getToken() },
     transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionDelay: 2000,
