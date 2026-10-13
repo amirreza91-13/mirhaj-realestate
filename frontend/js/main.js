@@ -4,6 +4,17 @@
 
 const API = window.location.origin + '/api';
 
+// Treat dynamic text as text, never as executable HTML.
+function escapeHTML(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[char]);
+}
+
 // ---- Auth Helpers ----
 function getToken() { return localStorage.getItem('mirhaj_token'); }
 function getUser()  { 
@@ -44,7 +55,11 @@ function showToast(message, type = 'info', duration = 3500) {
   const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.innerHTML = `<span>${icons[type] || ''}</span><span>${message}</span>`;
+  const icon = document.createElement('span');
+  icon.textContent = icons[type] || '';
+  const text = document.createElement('span');
+  text.textContent = String(message ?? '');
+  toast.append(icon, text);
   container.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-100%)'; toast.style.transition = '0.3s'; setTimeout(() => toast.remove(), 300); }, duration);
 }
@@ -110,23 +125,30 @@ function avatarEmoji(n) { return AVATARS[(parseInt(n) || 1) - 1] || AVATARS[0]; 
 
 // ---- Build Property Card HTML ----
 function buildPropertyCard(p) {
-  const img = p.primary_image
-    ? `<img src="/${p.primary_image}" alt="${p.title}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=no-image>🏠</div>'">`
+  const propertyId = Number.parseInt(p.id, 10);
+  if (!Number.isSafeInteger(propertyId) || propertyId < 1) return '';
+
+  const imagePath = p.primary_image ? escapeHTML(p.primary_image) : '';
+  const title = escapeHTML(p.title);
+  const locationName = escapeHTML(p.location_name || '---');
+  const propertyType = escapeHTML(propertyTypeLabel(p.property_type));
+  const img = imagePath
+    ? `<img src="/${imagePath}" alt="${title}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=no-image>🏠</div>'">`
     : `<div class="no-image">🏠</div>`;
 
   return `
-    <div class="property-card" onclick="location.href='/pages/property-detail.html?id=${p.id}'">
+    <div class="property-card" onclick="location.href='/pages/property-detail.html?id=${propertyId}'">
       <div class="property-card-img">
         ${img}
-        <span class="property-badge ${p.active ? '' : 'inactive'}">${propertyTypeLabel(p.property_type)}</span>
+        <span class="property-badge ${p.active ? '' : 'inactive'}">${propertyType}</span>
       </div>
       <div class="property-card-body">
-        <div class="property-card-title">${p.title}</div>
-        <div class="property-card-location">📍 ${p.location_name || '---'}</div>
+        <div class="property-card-title">${title}</div>
+        <div class="property-card-location">📍 ${locationName}</div>
         <div class="property-card-meta">
-          ${p.rooms ? `<span class="property-meta-item">🛏️ ${p.rooms} اتاق</span>` : ''}
-          ${p.area ? `<span class="property-meta-item">📐 ${p.area} م²</span>` : ''}
-          ${p.building_age ? `<span class="property-meta-item">🏗️ ${p.building_age} سال</span>` : ''}
+          ${p.rooms ? `<span class="property-meta-item">🛏️ ${escapeHTML(p.rooms)} اتاق</span>` : ''}
+          ${p.area ? `<span class="property-meta-item">📐 ${escapeHTML(p.area)} م²</span>` : ''}
+          ${p.building_age ? `<span class="property-meta-item">🏗️ ${escapeHTML(p.building_age)} سال</span>` : ''}
         </div>
         <div class="property-card-price">${formatPrice(p.total_price)}</div>
       </div>
@@ -231,19 +253,46 @@ async function loadLocations(selectEl, selectedId = null) {
 function confirmAction(message, onConfirm) {
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay active';
-  overlay.innerHTML = `
-    <div class="modal" style="max-width:400px">
-      <div class="modal-header"><h3>تأیید عملیات</h3></div>
-      <div class="modal-body"><p>${message}</p></div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" id="confirm-cancel">انصراف</button>
-        <button class="btn btn-danger" id="confirm-ok">تأیید</button>
-      </div>
-    </div>`;
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.style.maxWidth = '400px';
+
+  const header = document.createElement('div');
+  header.className = 'modal-header';
+  const heading = document.createElement('h3');
+  heading.textContent = 'تأیید عملیات';
+  header.appendChild(heading);
+
+  const body = document.createElement('div');
+  body.className = 'modal-body';
+  const messageElement = document.createElement('p');
+  messageElement.textContent = String(message ?? '');
+  body.appendChild(messageElement);
+
+  const footer = document.createElement('div');
+  footer.className = 'modal-footer';
+  const cancelButton = document.createElement('button');
+  cancelButton.className = 'btn btn-ghost';
+  cancelButton.textContent = 'انصراف';
+  const confirmButton = document.createElement('button');
+  confirmButton.className = 'btn btn-danger';
+  confirmButton.textContent = 'تأیید';
+  footer.append(cancelButton, confirmButton);
+  modal.append(header, body, footer);
+  overlay.appendChild(modal);
   document.body.appendChild(overlay);
   document.body.style.overflow = 'hidden';
-  overlay.querySelector('#confirm-cancel').onclick = () => { overlay.remove(); document.body.style.overflow = ''; };
-  overlay.querySelector('#confirm-ok').onclick = () => { overlay.remove(); document.body.style.overflow = ''; onConfirm(); };
+
+  const close = () => {
+    overlay.remove();
+    document.body.style.overflow = '';
+  };
+  cancelButton.addEventListener('click', close);
+  confirmButton.addEventListener('click', () => {
+    close();
+    onConfirm();
+  });
 }
 
 // ---- Unread Messages Badge ----
