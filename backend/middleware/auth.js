@@ -1,7 +1,13 @@
 const jwt = require('jsonwebtoken');
 const { get } = require('../../database/db');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'mirhaj_secret_key_2024_fallback';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  throw new Error(
+    'JWT_SECRET must be configured in the root .env file with at least 32 characters.'
+  );
+}
 
 // Verify JWT token
 function authMiddleware(req, res, next) {
