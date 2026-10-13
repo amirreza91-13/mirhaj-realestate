@@ -108,7 +108,16 @@ The project also declares a `prod` script that sets `NODE_ENV=production` using 
 
 ### Configuration
 
-Review `backend/server.js` and the backend modules for required environment variables before running the application. Keep secrets in a local environment file when supported, never commit credentials, and replace any default or fallback secrets before deployment.
+Create a local environment file from the template:
+
+```powershell
+Copy-Item .env.example .env
+node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+```
+
+Copy the generated random value into `JWT_SECRET` in `.env`. Set a unique `INITIAL_MANAGER_USERNAME` and an `INITIAL_MANAGER_PASSWORD` of at least 16 characters before the first database initialization. The application intentionally refuses to use a built-in JWT secret or a built-in manager password.
+
+Keep `.env` private and never commit it. If a database was initialized by an earlier version, do not assume the old seeded manager credentials were removed by this code update; change that account's password and review its access before exposing the application.
 
 Runtime behavior, required configuration, and production readiness have not been certified by this README.
 
@@ -116,9 +125,10 @@ Runtime behavior, required configuration, and production readiness have not been
 
 Before exposing this application to a public network:
 
-* Replace any default or seeded account credentials.
-* Ensure JWT secrets are unique, strong, and supplied through environment variables.
-* Remove insecure fallback secrets.
+* Configure a unique JWT secret of at least 32 characters through `JWT_SECRET`.
+* Configure the initial manager credentials before first database initialization.
+* Rotate credentials in databases created by earlier versions; code changes do not rewrite an existing database.
+* Keep `.env` and database files private.
 * Validate uploaded files, file sizes, and file types on the server.
 * Review authentication and authorization for every protected route.
 * Restrict database and uploaded-file access.
