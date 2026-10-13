@@ -90,20 +90,27 @@ cd mirhaj-realestate
 npm install
 ```
 
-### Configuration and Run
+### Run in Development
 
-1. Inspect `package.json` to identify the supported scripts.
-2. Review the project's configuration and environment-variable requirements.
-3. Configure secrets using environment variables rather than hardcoding them.
-4. Run the documented development or start script from `package.json`.
-
-For example, if the corresponding script exists:
+Start the development server using the script declared in `package.json`:
 
 ```bash
 npm run dev
 ```
 
-The exact start command and required environment variables must be confirmed against the current repository configuration.
+For a normal start:
+
+```bash
+npm start
+```
+
+The project also declares a `prod` script that sets `NODE_ENV=production` using POSIX shell syntax. On Windows, that command may require a cross-platform environment-variable tool or an adjusted script.
+
+### Configuration
+
+Review `backend/server.js` and the backend modules for required environment variables before running the application. Keep secrets in a local environment file when supported, never commit credentials, and replace any default or fallback secrets before deployment.
+
+Runtime behavior, required configuration, and production readiness have not been certified by this README.
 
 ## Security Considerations
 
@@ -136,7 +143,7 @@ For improvements, start by reviewing the current implementation, identifying rep
 
 ## License
 
-No license is declared here. Check the repository's license status before reusing or redistributing this project.
+A `LICENSE` file is present in this repository. Review that file for the applicable terms before reusing or redistributing the project.
 
 ---
 
