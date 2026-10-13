@@ -6,11 +6,11 @@
 
 A real-estate web application project focused on property-related workflows, application-server functionality, and user-facing features.
 
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge\&logo=nodedotjs\&logoColor=white)
-![Express](https://img.shields.io/badge/Express-0B1220?style=for-the-badge\&logo=express\&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge\&logo=javascript\&logoColor=0B1220)
-![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge\&logo=socketdotio\&logoColor=white)
-![SQL](https://img.shields.io/badge/sql.js-2563EB?style=for-the-badge)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-0B1220?style=flat-square&logo=express&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=0B1220)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=flat-square&logo=socketdotio&logoColor=white)
+![SQL](https://img.shields.io/badge/sql.js-2563EB?style=flat-square)
 
 [Overview](#overview) · [Technology](#technology-stack) · [Setup](#getting-started) · [Security](#security-considerations)
 
@@ -39,22 +39,15 @@ The project is intended to provide a foundation for organizing real-estate infor
 
 ## Architecture at a Glance
 
-```text
-Web Client
-    |
-    v
-Express Application
-    |
-    +---- HTTP Routes
-    |
-    +---- Authentication Components
-    |
-    +---- File Upload Handling
-    |
-    +---- Socket.IO
-    |
-    v
-sql.js Database Persistence
+```mermaid
+flowchart TD
+    C[Web Client] --> E[Express Server]
+    E --> R[HTTP Routes and Controllers]
+    E --> S[Socket.IO]
+    R --> A[Authentication and Authorization]
+    R --> U[Upload Handling]
+    R --> D[(sql.js Database)]
+    U --> F[(Uploaded Files)]
 ```
 
 This diagram represents the major components identified in the codebase; it is a conceptual overview, not a claim that every route or workflow has passed runtime testing.
