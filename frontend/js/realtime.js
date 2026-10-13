@@ -108,16 +108,45 @@ function showRealtimeToast(title, body, link, type = 'primary') {
     animation: slideIn 0.3s ease;
     cursor: pointer;
   `;
-  toast.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem">
-      <div>
-        <div style="font-weight:700;font-size:0.9rem;margin-bottom:0.25rem;color:var(--text-primary)">${title}</div>
-        <div style="font-size:0.8rem;color:var(--text-muted);line-height:1.5">${body}</div>
-        ${link ? `<div style="font-size:0.78rem;color:${colors[type]};margin-top:0.4rem;font-weight:600">مشاهده ›</div>` : ''}
-      </div>
-      <button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:var(--text-muted);font-size:1.1rem;cursor:pointer;flex-shrink:0">✕</button>
-    </div>`;
-  if (link) toast.addEventListener('click', (e) => { if (e.target.tagName !== 'BUTTON') location.href = link; });
+  const content = document.createElement('div');
+  content.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem';
+
+  const textContent = document.createElement('div');
+  const titleElement = document.createElement('div');
+  titleElement.style.cssText = 'font-weight:700;font-size:0.9rem;margin-bottom:0.25rem;color:var(--text-primary)';
+  titleElement.textContent = String(title ?? '');
+
+  const bodyElement = document.createElement('div');
+  bodyElement.style.cssText = 'font-size:0.8rem;color:var(--text-muted);line-height:1.5';
+  bodyElement.textContent = String(body ?? '');
+
+  textContent.append(titleElement, bodyElement);
+
+  if (link) {
+    const linkLabel = document.createElement('div');
+    linkLabel.style.cssText = `font-size:0.78rem;color:${colors[type] || colors.primary};margin-top:0.4rem;font-weight:600`;
+    linkLabel.textContent = 'مشاهده ›';
+    textContent.appendChild(linkLabel);
+  }
+
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.textContent = '✕';
+  closeButton.setAttribute('aria-label', 'بستن اعلان');
+  closeButton.style.cssText = 'background:none;border:none;color:var(--text-muted);font-size:1.1rem;cursor:pointer;flex-shrink:0';
+  closeButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    toast.remove();
+  });
+
+  content.append(textContent, closeButton);
+  toast.appendChild(content);
+
+  if (link) {
+    toast.addEventListener('click', (event) => {
+      if (!closeButton.contains(event.target)) window.location.href = link;
+    });
+  }
   document.body.appendChild(toast);
 
   // صدای اعلان (اختیاری)
