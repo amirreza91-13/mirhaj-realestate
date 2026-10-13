@@ -1,5 +1,7 @@
  <div align="center">
 
+<img src="./frontend/assets/logo.svg" alt="Mirhaj Real Estate logo" width="104" />
+
 # Mirhaj Real Estate
 
 ### A Web Application for Real Estate Workflows
