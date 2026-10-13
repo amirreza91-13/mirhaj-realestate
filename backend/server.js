@@ -5,7 +5,8 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const { Server } = require('socket.io');
-const { initializeDatabase } = require('../database/db');
+const jwt = require('jsonwebtoken');
+const { initializeDatabase, get } = require('../database/db');
 
 const app = express();
 const server = http.createServer(app);
@@ -14,7 +15,28 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET;
 app.set('io', io);
+
+// Authenticate sockets when a token is provided. Anonymous sockets may receive
+// public events, but cannot join private user rooms.
+io.use((socket, next) => {
+  const token = socket.handshake.auth && socket.handshake.auth.token;
+  if (!token) {
+    socket.userId = null;
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = get('SELECT id, active FROM users WHERE id = ?', [decoded.id]);
+    if (!user || !user.active) return next(new Error('Unauthorized'));
+    socket.userId = user.id;
+    return next();
+  } catch {
+    return next(new Error('Unauthorized'));
+  }
+});
 
 // Uploads directory
 const uploadsDir = path.join(__dirname, '../uploads');
@@ -46,24 +68,38 @@ const onlineUsers = new Map();
 
 io.on('connection', (socket) => {
   socket.on('user:join', (userId) => {
-    if (userId) {
-      onlineUsers.set(parseInt(userId), socket.id);
-      socket.userId = parseInt(userId);
-      socket.join(`user:${userId}`);
-      io.emit('online:count', onlineUsers.size);
+    const requestedId = Number.parseInt(userId, 10);
+    if (!socket.userId || !Number.isSafeInteger(requestedId) || requestedId !== socket.userId) {
+      return;
     }
+
+    onlineUsers.set(socket.userId, socket.id);
+    socket.join(`user:${socket.userId}`);
+    io.emit('online:count', onlineUsers.size);
   });
 
   socket.on('disconnect', () => {
-    if (socket.userId) {
+    if (socket.userId && onlineUsers.get(socket.userId) === socket.id) {
       onlineUsers.delete(socket.userId);
       io.emit('online:count', onlineUsers.size);
     }
   });
 
-  socket.on('message:read', (data) => {
-    const { senderId } = data;
-    if (senderId && onlineUsers.has(parseInt(senderId))) {
+  socket.on('message:read', (data = {}) => {
+    if (!socket.userId) return;
+
+    const senderId = Number.parseInt(data.senderId, 10);
+    if (!Number.isSafeInteger(senderId) || senderId < 1 || !onlineUsers.has(senderId)) {
+      return;
+    }
+
+    // Only emit a read receipt when this user has actually read a message
+    // from the claimed sender.
+    const readMessage = get(
+      'SELECT id FROM messages WHERE sender_id = ? AND receiver_id = ? AND is_read = 1 LIMIT 1',
+      [senderId, socket.userId]
+    );
+    if (readMessage) {
       io.to(`user:${senderId}`).emit('message:seen', { by: socket.userId });
     }
   });
