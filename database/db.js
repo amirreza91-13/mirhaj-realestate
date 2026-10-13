@@ -240,22 +240,32 @@ function seedData() {
     console.log('✅ لوکیشن‌ها اضافه شدند');
   }
 
-  // Seed manager account
+  // Create the initial manager only when explicit credentials are configured.
   const managerCount = db.exec(`SELECT COUNT(*) as count FROM users WHERE role = 'manager'`);
   if (managerCount[0].values[0][0] === 0) {
-    const bcrypt = require('bcrypt');
-    const hashedPassword = bcrypt.hashSync('admin123', 10);
-    db.run(
-      `INSERT INTO users (username, password, full_name, role, avatar) VALUES (?, ?, ?, ?, ?)`,
-      ['admin', hashedPassword, 'مدیر کل', 'manager', 1]
-    );
-    console.log('✅ اکانت مدیر ساخته شد - username: admin | password: admin123');
+    const managerUsername = process.env.INITIAL_MANAGER_USERNAME;
+    const managerPassword = process.env.INITIAL_MANAGER_PASSWORD;
+
+    if (!managerUsername || !managerPassword || managerPassword.length < 16) {
+      console.warn(
+        '⚠️ مدیر اولیه ساخته نشد. تنظیم INITIAL_MANAGER_USERNAME و ' +
+        'INITIAL_MANAGER_PASSWORD (حداقل 16 نویسه) در فایل .env الزامی است.'
+      );
+    } else {
+      const bcrypt = require('bcrypt');
+      const hashedPassword = bcrypt.hashSync(managerPassword, 12);
+      db.run(
+        `INSERT INTO users (username, password, full_name, role, avatar) VALUES (?, ?, ?, ?, ?)`,
+        [managerUsername, hashedPassword, 'مدیر سامانه', 'manager', 1]
+      );
+      console.log('✅ حساب مدیر اولیه با اطلاعات تنظیم‌شده در محیط ساخته شد.');
+    }
   }
 
   // Seed sample properties
   const propCount = db.exec(`SELECT COUNT(*) as count FROM properties`);
   if (propCount[0].values[0][0] === 0) {
-    const adminUser = db.exec(`SELECT id FROM users WHERE username = 'admin'`);
+    const adminUser = db.exec(`SELECT id FROM users WHERE role = 'manager' ORDER BY id LIMIT 1`);
     if (adminUser[0] && adminUser[0].values.length > 0) {
       const adminId = adminUser[0].values[0][0];
 
